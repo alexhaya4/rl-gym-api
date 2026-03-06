@@ -1,0 +1,104 @@
+import gymnasium as gym
+import numpy as np
+
+_environments: dict[str, gym.Env] = {}
+_environment_ids: dict[str, str] = {}
+
+AVAILABLE_ENVIRONMENTS = [
+    "CartPole-v1",
+    "LunarLander-v3",
+    "MountainCar-v0",
+    "Acrobot-v1",
+    "Pendulum-v1",
+]
+
+
+def _space_to_dict(space: gym.Space) -> dict:
+    info: dict = {"type": type(space).__name__}
+    if isinstance(space, gym.spaces.Discrete):
+        info["n"] = int(space.n)
+    elif isinstance(space, gym.spaces.Box):
+        info["shape"] = list(space.shape)
+        info["low"] = space.low.tolist()
+        info["high"] = space.high.tolist()
+    elif isinstance(space, gym.spaces.MultiDiscrete):
+        info["nvec"] = space.nvec.tolist()
+    return info
+
+
+def _to_list(value: object) -> list:
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, (list, tuple)):
+        return list(value)
+    return [value]
+
+
+def _clean_info(info: dict) -> dict:
+    cleaned = {}
+    for k, v in info.items():
+        if isinstance(v, np.ndarray):
+            cleaned[k] = v.tolist()
+        elif isinstance(v, (np.integer, np.floating)):
+            cleaned[k] = v.item()
+        else:
+            cleaned[k] = v
+    return cleaned
+
+
+def create_environment(env_key: str, environment_id: str, render_mode: str | None = None) -> dict:
+    kwargs: dict = {}
+    if render_mode:
+        kwargs["render_mode"] = render_mode
+    env = gym.make(environment_id, **kwargs)
+    _environments[env_key] = env
+    _environment_ids[env_key] = environment_id
+    return {
+        "observation_space": _space_to_dict(env.observation_space),
+        "action_space": _space_to_dict(env.action_space),
+    }
+
+
+def get_environment(env_key: str) -> gym.Env | None:
+    return _environments.get(env_key)
+
+
+def step_environment(env_key: str, action: int | list[float]) -> dict:
+    env = _environments[env_key]
+    observation, reward, terminated, truncated, info = env.step(action)
+    return {
+        "observation": _to_list(observation),
+        "reward": float(reward),
+        "terminated": bool(terminated),
+        "truncated": bool(truncated),
+        "info": _clean_info(info),
+    }
+
+
+def reset_environment(env_key: str) -> dict:
+    env = _environments[env_key]
+    observation, info = env.reset()
+    return {
+        "observation": _to_list(observation),
+        "info": _clean_info(info),
+    }
+
+
+def close_environment(env_key: str) -> bool:
+    env = _environments.pop(env_key, None)
+    _environment_ids.pop(env_key, None)
+    if env is None:
+        return False
+    env.close()
+    return True
+
+
+def list_environments() -> list[dict]:
+    return [
+        {"env_key": key, "environment_id": _environment_ids[key]}
+        for key in _environments
+    ]
+
+
+def get_available_environments() -> list[str]:
+    return AVAILABLE_ENVIRONMENTS
