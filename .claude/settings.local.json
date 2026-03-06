@@ -3,7 +3,10 @@
     "allow": [
       "WebSearch",
       "Bash(pip install:*)",
-      "Bash(pytest:*)"
+      "Bash(pytest:*)",
+      "Bash(gh repo:*)",
+      "Bash(alembic init:*)",
+      "Bash(alembic revision:*)"
     ]
   }
 }
