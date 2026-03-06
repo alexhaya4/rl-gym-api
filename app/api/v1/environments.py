@@ -45,7 +45,7 @@ async def create_env(
     try:
         info = create_environment(env_key, body.environment_id, body.render_mode)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     return EnvironmentResponse(
         env_key=env_key,
         environment_id=body.environment_id,
@@ -94,7 +94,7 @@ async def step_env(
     try:
         result = step_environment(env_key, body.action)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     if result["terminated"] or result["truncated"]:
         reset_environment(env_key)
     return StepResponse(**result)

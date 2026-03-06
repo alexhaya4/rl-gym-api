@@ -5,7 +5,11 @@ from app.db.session import get_db
 from app.dependencies import get_current_active_user
 from app.models.user import User
 from app.schemas.training import TrainingConfig, TrainingResult, TrainingStatus
-from app.services.training import get_training_status, list_training_sessions, start_training
+from app.services.training import (
+    get_training_status,
+    list_training_sessions,
+    start_training,
+)
 
 router = APIRouter(prefix="/training", tags=["training"])
 
@@ -21,7 +25,7 @@ async def create_training(
     try:
         result = await start_training(db, config, current_user.id)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     return TrainingStatus(**result)
 
 

@@ -1,6 +1,6 @@
 import asyncio
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import gymnasium as gym
 from sqlalchemy import select
@@ -67,7 +67,7 @@ async def start_training(db: AsyncSession, config: TrainingConfig, user_id: int)
         result = await loop.run_in_executor(None, _run_training, config)
 
         experiment.status = "completed"
-        experiment.completed_at = datetime.now(timezone.utc)
+        experiment.completed_at = datetime.now(UTC)
         await db.commit()
         await db.refresh(experiment)
 

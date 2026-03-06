@@ -1,5 +1,9 @@
 from app.db.session import Base, engine
-from app.models import Episode, Experiment, User  # noqa: F401 — register models with Base.metadata
+from app.models import (  # noqa: F401 — register models with Base.metadata
+    Episode,
+    Experiment,
+    User,
+)
 
 
 async def init_db() -> None:
