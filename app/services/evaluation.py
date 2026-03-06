@@ -51,7 +51,7 @@ def _run_evaluation(
         if isinstance(episode_lengths, (int, float)):
             length_list = [int(episode_lengths)]
         else:
-            length_list = [int(l) for l in episode_lengths]
+            length_list = [int(ep_len) for ep_len in episode_lengths]
 
         return reward_list, length_list
     finally:
@@ -92,7 +92,7 @@ async def evaluate_experiment(
     max_reward = float(rewards_array.max())
 
     episodes: list[EpisodeMetrics] = []
-    for i, (reward, length) in enumerate(zip(episode_rewards, episode_lengths)):
+    for i, (reward, length) in enumerate(zip(episode_rewards, episode_lengths, strict=False)):
         episodes.append(
             EpisodeMetrics(
                 episode_number=i + 1,
