@@ -2,15 +2,17 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1 import router as v1_router
 from app.api.v1.websockets import router as ws_router
 from app.config import get_settings
 from app.core.logging import RequestIDMiddleware, configure_logging
 from app.core.rate_limit import limiter, rate_limit_exceeded_handler
+from app.db.session import get_db
 
 VERSION = "0.1.0"
 
@@ -78,8 +80,10 @@ def create_app() -> FastAPI:
     app.include_router(ws_router, prefix="/api/v1")
 
     @app.get("/health")
-    async def health():
-        return {"status": "ok", "version": VERSION}
+    async def health(db: AsyncSession = Depends(get_db)):
+        from app.core.health import get_health_status
+
+        return await get_health_status(db)
 
     return app
 
