@@ -13,14 +13,14 @@ RL Gym API exposes Gymnasium environments as API endpoints, enabling remote trai
 
 ## Features
 
-- **RL Environments** — Create, reset, step, and manage Gymnasium environments via REST
-- **Training** — Train agents with PPO, A2C, and DQN using Stable Baselines3
-- **Benchmarking** — Compare algorithms across multiple environments in a single request
-- **Experiments** — Full CRUD for experiment tracking with pagination and filtering
-- **WebSockets** — Real-time training metrics streaming
-- **JWT Authentication** — Secure endpoints with token-based auth
-- **Docker** — Multi-stage builds with PostgreSQL support
-- **CI/CD** — GitHub Actions pipeline with linting, testing, and Docker build verification
+- **RL Environments** - Create, reset, step, and manage Gymnasium environments via REST
+- **Training** - Train agents with PPO, A2C, and DQN using Stable Baselines3
+- **Benchmarking** - Compare algorithms across multiple environments in a single request
+- **Experiments** - Full CRUD for experiment tracking with pagination and filtering
+- **WebSockets** - Real-time training metrics streaming
+- **JWT Authentication** - Secure endpoints with token-based auth
+- **Docker** - Multi-stage builds with PostgreSQL support
+- **CI/CD** - GitHub Actions pipeline with linting, testing, and Docker build verification
 
 ## Tech Stack
 
