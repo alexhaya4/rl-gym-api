@@ -98,3 +98,79 @@ async def test_delete_environment(client: AsyncClient, auth_headers: dict[str, s
         headers=auth_headers,
     )
     assert response.status_code == 204
+
+
+async def test_step_nonexistent_environment(
+    client: AsyncClient, auth_headers: dict[str, str]
+) -> None:
+    response = await client.post(
+        "/api/v1/environments/nonexistent-key/step",
+        json={"action": 0},
+        headers=auth_headers,
+    )
+    assert response.status_code == 404
+
+
+async def test_reset_nonexistent_environment(
+    client: AsyncClient, auth_headers: dict[str, str]
+) -> None:
+    response = await client.post(
+        "/api/v1/environments/nonexistent-key/reset",
+        headers=auth_headers,
+    )
+    assert response.status_code == 404
+
+
+async def test_create_invalid_environment(
+    client: AsyncClient, auth_headers: dict[str, str]
+) -> None:
+    response = await client.post(
+        "/api/v1/environments/",
+        json={"environment_id": "InvalidEnv-v999"},
+        headers=auth_headers,
+    )
+    assert response.status_code in (400, 500)
+
+
+async def test_list_environments_empty(
+    client: AsyncClient, auth_headers: dict[str, str]
+) -> None:
+    # Clear global env state for a clean check
+    from app.services.environment import _environment_ids, _environments
+
+    _environments.clear()
+    _environment_ids.clear()
+
+    response = await client.get(
+        "/api/v1/environments/",
+        headers=auth_headers,
+    )
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+async def test_create_multiple_environments(
+    client: AsyncClient, auth_headers: dict[str, str]
+) -> None:
+    from app.services.environment import _environment_ids, _environments
+
+    _environments.clear()
+    _environment_ids.clear()
+
+    await client.post(
+        "/api/v1/environments/",
+        json={"environment_id": "CartPole-v1"},
+        headers=auth_headers,
+    )
+    await client.post(
+        "/api/v1/environments/",
+        json={"environment_id": "MountainCar-v0"},
+        headers=auth_headers,
+    )
+
+    response = await client.get(
+        "/api/v1/environments/",
+        headers=auth_headers,
+    )
+    assert response.status_code == 200
+    assert len(response.json()) == 2

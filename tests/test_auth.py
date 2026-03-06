@@ -75,3 +75,41 @@ async def test_get_current_user(client: AsyncClient) -> None:
     data = response.json()
     assert data["username"] == "meuser"
     assert data["email"] == "me@example.com"
+
+
+async def test_login_nonexistent_user(client: AsyncClient) -> None:
+    response = await client.post("/api/v1/auth/login", data={
+        "username": "ghost",
+        "password": "doesnotmatter",
+    })
+    assert response.status_code == 401
+
+
+async def test_register_invalid_email(client: AsyncClient) -> None:
+    response = await client.post("/api/v1/auth/register", json={
+        "username": "badmail",
+        "email": "not-an-email",
+        "password": "securepassword",
+    })
+    assert response.status_code == 422
+
+
+async def test_register_short_password(client: AsyncClient) -> None:
+    response = await client.post("/api/v1/auth/register", json={
+        "username": "shortpw",
+        "email": "short@example.com",
+        "password": "abc",
+    })
+    assert response.status_code == 422
+
+
+async def test_access_protected_route_without_token(client: AsyncClient) -> None:
+    response = await client.get("/api/v1/auth/me")
+    assert response.status_code == 401
+
+
+async def test_access_protected_route_with_invalid_token(client: AsyncClient) -> None:
+    response = await client.get("/api/v1/auth/me", headers={
+        "Authorization": "Bearer totally.invalid.token",
+    })
+    assert response.status_code == 401
