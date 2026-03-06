@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String
+from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
@@ -24,6 +24,8 @@ class Experiment(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    mean_reward: Mapped[float | None] = mapped_column(Float, nullable=True)
+    std_reward: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     def __repr__(self) -> str:
         return f"<Experiment(id={self.id}, name={self.name!r}, status={self.status!r})>"

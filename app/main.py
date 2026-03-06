@@ -29,9 +29,20 @@ def create_app() -> FastAPI:
 
     app = FastAPI(
         title="RL Gym API",
-        description="A RESTful API for reinforcement learning experiments using Gymnasium and Stable Baselines3.",
+        description=(
+            "A production-ready RESTful API for reinforcement learning experiments "
+            "built with FastAPI, OpenAI Gymnasium, and Stable Baselines3.\n\n"
+            "## Key Features\n\n"
+            "- **Environments** — Create, reset, step, and manage Gymnasium environments\n"
+            "- **Training** — Train RL agents with PPO, A2C, and DQN algorithms\n"
+            "- **Experiments** — Track and manage experiment lifecycle and results\n"
+            "- **Benchmarking** — Compare algorithms across multiple environments\n"
+            "- **WebSockets** — Real-time training metrics streaming\n"
+            "- **JWT Authentication** — Secure endpoints with token-based auth\n"
+        ),
         version=VERSION,
         lifespan=lifespan,
+        terms_of_service="https://rlgymapi.dev/terms",
         contact={
             "name": "RL Gym API Team",
             "email": "support@rlgymapi.dev",
@@ -40,6 +51,15 @@ def create_app() -> FastAPI:
             "name": "MIT",
             "url": "https://opensource.org/licenses/MIT",
         },
+        openapi_tags=[
+            {"name": "auth", "description": "User registration and JWT authentication"},
+            {"name": "environments", "description": "Gymnasium environment management"},
+            {"name": "training", "description": "RL agent training and evaluation"},
+            {"name": "experiments", "description": "Experiment tracking and lifecycle management"},
+            {"name": "benchmarks", "description": "Algorithm benchmarking across environments"},
+            {"name": "websockets", "description": "Real-time training metrics via WebSocket"},
+            {"name": "status", "description": "API status and health checks"},
+        ],
     )
 
     app.state.limiter = limiter

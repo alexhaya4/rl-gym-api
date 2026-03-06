@@ -6,7 +6,8 @@
       "Bash(pytest:*)",
       "Bash(gh repo:*)",
       "Bash(alembic init:*)",
-      "Bash(alembic revision:*)"
+      "Bash(alembic revision:*)",
+      "Bash(ruff check:*)"
     ]
   }
 }
