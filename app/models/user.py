@@ -10,7 +10,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class User(Base):
+class User(Base):  # type: ignore[misc]
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

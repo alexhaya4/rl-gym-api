@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -11,8 +13,8 @@ class EnvironmentResponse(BaseModel):
 
     env_key: str
     environment_id: str
-    observation_space: dict
-    action_space: dict
+    observation_space: dict[str, Any]
+    action_space: dict[str, Any]
     status: str = "ready"
 
 
@@ -27,11 +29,11 @@ class StepResponse(BaseModel):
     reward: float
     terminated: bool
     truncated: bool
-    info: dict
+    info: dict[str, Any]
 
 
 class ResetResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     observation: list[float]
-    info: dict
+    info: dict[str, Any]

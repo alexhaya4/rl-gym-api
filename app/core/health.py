@@ -1,5 +1,6 @@
 import time
 from datetime import UTC, datetime
+from typing import Any
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,7 +11,7 @@ from app.main import VERSION
 START_TIME = time.time()
 
 
-async def get_health_status(db: AsyncSession) -> dict:
+async def get_health_status(db: AsyncSession) -> dict[str, Any]:
     settings = get_settings()
 
     db_status = "connected"
@@ -23,7 +24,7 @@ async def get_health_status(db: AsyncSession) -> dict:
 
     status = "healthy" if db_status == "connected" else "degraded"
 
-    result = {
+    result: dict[str, Any] = {
         "status": status,
         "version": VERSION,
         "environment": settings.ENVIRONMENT,

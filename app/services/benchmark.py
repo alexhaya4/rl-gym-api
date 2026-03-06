@@ -31,15 +31,17 @@ def _train_and_evaluate(
         model.learn(total_timesteps=total_timesteps)
         training_time = time.time() - start_time
 
-        mean_reward, std_reward = evaluate_policy(
+        raw_mean, raw_std = evaluate_policy(
             model, env, n_eval_episodes=n_eval_episodes
         )
+        mean_reward = float(raw_mean) if isinstance(raw_mean, float) else float(raw_mean[0])
+        std_reward = float(raw_std) if isinstance(raw_std, (float, int)) else float(raw_std[0])
 
         return BenchmarkResult(
             environment_id=environment_id,
             algorithm=algorithm,
-            mean_reward=float(mean_reward),
-            std_reward=float(std_reward),
+            mean_reward=mean_reward,
+            std_reward=std_reward,
             training_time_seconds=round(training_time, 3),
             total_timesteps=total_timesteps,
         )

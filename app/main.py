@@ -1,6 +1,7 @@
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -65,7 +66,10 @@ def create_app() -> FastAPI:
     )
 
     app.state.limiter = limiter
-    app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+    app.add_exception_handler(
+        RateLimitExceeded,
+        rate_limit_exceeded_handler,  # type: ignore[arg-type]
+    )
 
     app.add_middleware(
         CORSMiddleware,
@@ -80,7 +84,7 @@ def create_app() -> FastAPI:
     app.include_router(ws_router, prefix="/api/v1")
 
     @app.get("/health")
-    async def health(db: AsyncSession = Depends(get_db)):
+    async def health(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
         from app.core.health import get_health_status
 
         return await get_health_status(db)

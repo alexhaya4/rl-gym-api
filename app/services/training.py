@@ -1,6 +1,7 @@
 import asyncio
 import time
 from datetime import UTC, datetime
+from typing import Any
 
 import gymnasium as gym
 from sqlalchemy import select
@@ -11,7 +12,7 @@ from stable_baselines3.common.evaluation import evaluate_policy
 from app.models.experiment import Experiment
 from app.schemas.training import TrainingConfig
 
-_training_sessions: dict[int, dict] = {}
+_training_sessions: dict[int, dict[str, Any]] = {}
 
 ALGORITHMS = {
     "PPO": PPO,
@@ -20,7 +21,7 @@ ALGORITHMS = {
 }
 
 
-def _run_training(config: TrainingConfig) -> dict:
+def _run_training(config: TrainingConfig) -> dict[str, Any]:
     env = gym.make(config.environment_id)
     algo_class = ALGORITHMS[config.algorithm]
     model = algo_class("MlpPolicy", env, **config.hyperparameters)
@@ -29,18 +30,20 @@ def _run_training(config: TrainingConfig) -> dict:
     model.learn(total_timesteps=config.total_timesteps)
     elapsed_time = time.time() - start_time
 
-    mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10)
+    raw_mean, raw_std = evaluate_policy(model, env, n_eval_episodes=10)
+    mean_reward = float(raw_mean) if isinstance(raw_mean, float) else float(raw_mean[0])
+    std_reward = float(raw_std) if isinstance(raw_std, (float, int)) else float(raw_std[0])
 
     env.close()
 
     return {
-        "mean_reward": float(mean_reward),
-        "std_reward": float(std_reward),
+        "mean_reward": mean_reward,
+        "std_reward": std_reward,
         "elapsed_time": elapsed_time,
     }
 
 
-async def start_training(db: AsyncSession, config: TrainingConfig, user_id: int) -> dict:
+async def start_training(db: AsyncSession, config: TrainingConfig, user_id: int) -> dict[str, Any]:
     experiment = Experiment(
         name=config.experiment_name or f"{config.algorithm}_{config.environment_id}",
         environment_id=config.environment_id,
@@ -90,7 +93,7 @@ async def start_training(db: AsyncSession, config: TrainingConfig, user_id: int)
     return _training_sessions[experiment.id]
 
 
-async def get_training_status(db: AsyncSession, experiment_id: int) -> dict | None:
+async def get_training_status(db: AsyncSession, experiment_id: int) -> dict[str, Any] | None:
     if experiment_id in _training_sessions:
         return _training_sessions[experiment_id]
 
@@ -111,7 +114,7 @@ async def get_training_status(db: AsyncSession, experiment_id: int) -> dict | No
     }
 
 
-async def list_training_sessions(db: AsyncSession, user_id: int) -> list[dict]:
+async def list_training_sessions(db: AsyncSession, user_id: int) -> list[dict[str, Any]]:
     result = await db.execute(
         select(Experiment).where(Experiment.user_id == user_id)
     )

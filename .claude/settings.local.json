@@ -7,7 +7,8 @@
       "Bash(gh repo:*)",
       "Bash(alembic init:*)",
       "Bash(alembic revision:*)",
-      "Bash(ruff check:*)"
+      "Bash(ruff check:*)",
+      "Bash(mypy:*)"
     ]
   }
 }

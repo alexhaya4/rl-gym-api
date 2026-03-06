@@ -1,7 +1,9 @@
+from typing import Any
+
 import gymnasium as gym
 import numpy as np
 
-_environments: dict[str, gym.Env] = {}
+_environments: dict[str, gym.Env[Any, Any]] = {}
 _environment_ids: dict[str, str] = {}
 
 AVAILABLE_ENVIRONMENTS = [
@@ -13,8 +15,8 @@ AVAILABLE_ENVIRONMENTS = [
 ]
 
 
-def _space_to_dict(space: gym.Space) -> dict:
-    info: dict = {"type": type(space).__name__}
+def _space_to_dict(space: gym.Space[Any]) -> dict[str, Any]:
+    info: dict[str, Any] = {"type": type(space).__name__}
     if isinstance(space, gym.spaces.Discrete):
         info["n"] = int(space.n)
     elif isinstance(space, gym.spaces.Box):
@@ -26,16 +28,16 @@ def _space_to_dict(space: gym.Space) -> dict:
     return info
 
 
-def _to_list(value: object) -> list:
+def _to_list(value: object) -> list[Any]:
     if isinstance(value, np.ndarray):
-        return value.tolist()
+        return value.tolist()  # type: ignore[no-any-return]
     if isinstance(value, (list, tuple)):
         return list(value)
     return [value]
 
 
-def _clean_info(info: dict) -> dict:
-    cleaned = {}
+def _clean_info(info: dict[str, Any]) -> dict[str, Any]:
+    cleaned: dict[str, Any] = {}
     for k, v in info.items():
         if isinstance(v, np.ndarray):
             cleaned[k] = v.tolist()
@@ -46,8 +48,8 @@ def _clean_info(info: dict) -> dict:
     return cleaned
 
 
-def create_environment(env_key: str, environment_id: str, render_mode: str | None = None) -> dict:
-    kwargs: dict = {}
+def create_environment(env_key: str, environment_id: str, render_mode: str | None = None) -> dict[str, Any]:
+    kwargs: dict[str, Any] = {}
     if render_mode:
         kwargs["render_mode"] = render_mode
     env = gym.make(environment_id, **kwargs)
@@ -59,11 +61,11 @@ def create_environment(env_key: str, environment_id: str, render_mode: str | Non
     }
 
 
-def get_environment(env_key: str) -> gym.Env | None:
+def get_environment(env_key: str) -> gym.Env[Any, Any] | None:
     return _environments.get(env_key)
 
 
-def step_environment(env_key: str, action: int | list[float]) -> dict:
+def step_environment(env_key: str, action: int | list[float]) -> dict[str, Any]:
     env = _environments[env_key]
     observation, reward, terminated, truncated, info = env.step(action)
     return {
@@ -75,7 +77,7 @@ def step_environment(env_key: str, action: int | list[float]) -> dict:
     }
 
 
-def reset_environment(env_key: str) -> dict:
+def reset_environment(env_key: str) -> dict[str, Any]:
     env = _environments[env_key]
     observation, info = env.reset()
     return {
@@ -93,7 +95,7 @@ def close_environment(env_key: str) -> bool:
     return True
 
 
-def list_environments() -> list[dict]:
+def list_environments() -> list[dict[str, str]]:
     return [
         {"env_key": key, "environment_id": _environment_ids[key]}
         for key in _environments

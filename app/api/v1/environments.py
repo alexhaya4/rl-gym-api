@@ -32,7 +32,7 @@ async def available() -> list[str]:
 @router.get("/")
 async def list_envs(
     _current_user: User = Depends(get_current_active_user),
-) -> list[dict]:
+) -> list[dict[str, str]]:
     return list_environments()
 
 

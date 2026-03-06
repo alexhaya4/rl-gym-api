@@ -1,4 +1,5 @@
 import time
+from typing import Any
 
 from fastapi import APIRouter
 
@@ -23,7 +24,7 @@ router.include_router(ws_router)
 
 
 @router.get("/status", tags=["status"])
-async def api_status():
+async def api_status() -> dict[str, Any]:
     """Return current API status including version, environment, and uptime."""
     settings = get_settings()
     return {

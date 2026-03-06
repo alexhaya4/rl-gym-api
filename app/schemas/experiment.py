@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -7,7 +8,7 @@ class ExperimentBase(BaseModel):
     name: str
     environment_id: str
     algorithm: str
-    hyperparameters: dict = {}
+    hyperparameters: dict[str, Any] = {}
 
 
 class ExperimentCreate(ExperimentBase):
@@ -17,7 +18,7 @@ class ExperimentCreate(ExperimentBase):
 class ExperimentUpdate(BaseModel):
     name: str | None = None
     status: str | None = None
-    hyperparameters: dict | None = None
+    hyperparameters: dict[str, Any] | None = None
 
 
 class ExperimentResponse(ExperimentBase):

@@ -1,3 +1,4 @@
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.dependencies import get_current_active_user
@@ -21,7 +22,7 @@ ALGORITHM_DESCRIPTIONS = {
 async def run_benchmark_endpoint(
     request: BenchmarkRequest,
     current_user: User = Depends(get_current_active_user),
-):
+) -> BenchmarkResponse:
     """Run a benchmark comparing multiple algorithms across multiple environments."""
     invalid_envs = [e for e in request.environments if e not in AVAILABLE_ENVIRONMENTS]
     if invalid_envs:
@@ -45,13 +46,13 @@ async def run_benchmark_endpoint(
 
 
 @router.get("/environments")
-async def list_benchmark_environments():
+async def list_benchmark_environments() -> dict[str, list[str]]:
     """List available environments for benchmarking."""
     return {"environments": AVAILABLE_ENVIRONMENTS}
 
 
 @router.get("/algorithms")
-async def list_benchmark_algorithms():
+async def list_benchmark_algorithms() -> dict[str, list[dict[str, str]]]:
     """List supported algorithms with brief descriptions."""
     return {
         "algorithms": [

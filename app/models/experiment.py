@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from typing import Any
 
 from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -10,7 +11,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class Experiment(Base):
+class Experiment(Base):  # type: ignore[misc]
     __tablename__ = "experiments"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -18,7 +19,7 @@ class Experiment(Base):
     environment_id: Mapped[str] = mapped_column(String(50), nullable=False)
     algorithm: Mapped[str] = mapped_column(String(50), nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="pending")
-    hyperparameters: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    hyperparameters: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     total_timesteps: Mapped[int | None] = mapped_column(Integer, nullable=True)
     user_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)

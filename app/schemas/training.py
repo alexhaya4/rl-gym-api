@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -5,7 +7,7 @@ class TrainingConfig(BaseModel):
     environment_id: str
     algorithm: str = "PPO"
     total_timesteps: int = 10000
-    hyperparameters: dict = {}
+    hyperparameters: dict[str, Any] = {}
     experiment_name: str | None = None
 
 

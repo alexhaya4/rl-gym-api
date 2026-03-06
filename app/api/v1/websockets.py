@@ -38,7 +38,7 @@ async def training_ws(websocket: WebSocket, experiment_id: str) -> None:
         _active_connections.pop(connection_key, None)
 
 
-async def broadcast_metrics(experiment_id: str, metrics: dict) -> None:
+async def broadcast_metrics(experiment_id: str, metrics: dict[str, object]) -> None:
     to_remove = []
     for key, ws in _active_connections.items():
         if key.startswith(f"{experiment_id}:"):
