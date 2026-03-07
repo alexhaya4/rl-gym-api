@@ -7,6 +7,12 @@ A production-ready REST API for reinforcement learning experiments with OpenAI G
 ![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)
 ![CI](https://github.com/alexhaya4/rl-gym-api/actions/workflows/ci.yml/badge.svg)
 
+## Live Demo
+
+**[https://rl-gym-api-production.up.railway.app/docs](https://rl-gym-api-production.up.railway.app/docs)**
+
+Interactive API docs powered by Swagger UI. Register an account and explore all endpoints live.
+
 ## Overview
 
 RL Gym API exposes Gymnasium environments as API endpoints, enabling remote training, evaluation, and real-time interaction with RL agents over HTTP and WebSockets. It supports multiple algorithms (PPO, A2C, DQN), cross-environment benchmarking, and full experiment lifecycle management. Built for researchers and engineers who need a scalable, containerized RL backend with JWT authentication and structured logging.
