@@ -47,9 +47,8 @@ def validate_environment_code(source_code: str, name: str) -> tuple[bool, str | 
             for alias in node.names:
                 if alias.name in ("subprocess", "shutil"):
                     return False, f"Forbidden import: {alias.name}"
-        elif isinstance(node, ast.ImportFrom):
-            if node.module and node.module.split(".")[0] in ("subprocess", "shutil"):
-                return False, f"Forbidden import from: {node.module}"
+        elif isinstance(node, ast.ImportFrom) and node.module and node.module.split(".")[0] in ("subprocess", "shutil"):
+            return False, f"Forbidden import from: {node.module}"
 
     return True, None
 

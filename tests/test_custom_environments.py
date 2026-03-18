@@ -1,7 +1,6 @@
 import pytest
 from httpx import AsyncClient
 
-
 VALID_SOURCE_CODE = """
 import gymnasium as gym
 from gymnasium import spaces
