@@ -8,7 +8,11 @@
       "Bash(alembic init:*)",
       "Bash(alembic revision:*)",
       "Bash(ruff check:*)",
-      "Bash(mypy:*)"
+      "Bash(mypy:*)",
+      "Bash(alembic upgrade:*)",
+      "Bash(python -m pytest tests/test_custom_environments.py -v 2>&1 | tail -30)",
+      "Bash(python -m pytest tests/ -v --cov=app --cov-report=term-missing 2>&1)",
+      "Bash(git add:*)"
     ]
   }
 }
