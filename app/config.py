@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"
 
+    # Redis
+    REDIS_URL: str = "redis://localhost:6379"
+
     # CORS
     ALLOWED_ORIGINS: str = "http://localhost:3000"
 

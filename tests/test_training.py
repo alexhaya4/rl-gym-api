@@ -26,7 +26,8 @@ async def test_start_training(client: AsyncClient, auth_headers: dict[str, str])
     assert response.status_code == 202
     data = response.json()
     assert "experiment_id" in data
-    assert data["status"] in ("running", "completed")
+    assert data["status"] == "queued"
+    assert data["job_id"] is not None
     assert data["algorithm"] == "PPO"
 
 

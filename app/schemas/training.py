@@ -19,6 +19,7 @@ class TrainingStatus(BaseModel):
     environment_id: str
     algorithm: str
     total_timesteps: int
+    job_id: str | None = None
     elapsed_time: float | None = None
     mean_reward: float | None = None
     std_reward: float | None = None

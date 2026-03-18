@@ -1,15 +1,16 @@
+from arq.connections import ArqRedis
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.dependencies import get_current_active_user
+from app.dependencies import get_arq_redis, get_current_active_user
+from app.models.experiment import Experiment
+from app.models.job import Job
 from app.models.user import User
+from app.schemas.job import JobResponse
 from app.schemas.training import TrainingConfig, TrainingResult, TrainingStatus
-from app.services.training import (
-    get_training_status,
-    list_training_sessions,
-    start_training,
-)
+from app.services.training import get_training_status, list_training_sessions
 
 router = APIRouter(prefix="/training", tags=["training"])
 
@@ -19,14 +20,55 @@ async def create_training(
     config: TrainingConfig,
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
+    arq_redis: ArqRedis = Depends(get_arq_redis),
 ) -> TrainingStatus:
     if config.algorithm not in ("PPO", "A2C", "DQN"):
-        raise HTTPException(status_code=400, detail="Unsupported algorithm. Use PPO, A2C, or DQN.")
-    try:
-        result = await start_training(db, config, current_user.id)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-    return TrainingStatus(**result)
+        raise HTTPException(
+            status_code=400, detail="Unsupported algorithm. Use PPO, A2C, or DQN."
+        )
+
+    experiment = Experiment(
+        name=config.experiment_name or f"{config.algorithm}_{config.environment_id}",
+        environment_id=config.environment_id,
+        algorithm=config.algorithm,
+        status="queued",
+        hyperparameters=config.hyperparameters,
+        total_timesteps=config.total_timesteps,
+        user_id=current_user.id,
+    )
+    db.add(experiment)
+    await db.commit()
+    await db.refresh(experiment)
+
+    config_dict = {
+        "environment_id": config.environment_id,
+        "algorithm": config.algorithm,
+        "total_timesteps": config.total_timesteps,
+        "hyperparameters": config.hyperparameters,
+    }
+
+    arq_job = await arq_redis.enqueue_job(
+        "run_training_job",
+        experiment.id,
+        config_dict,
+    )
+
+    job = Job(
+        id=arq_job.job_id,
+        experiment_id=experiment.id,
+        status="queued",
+    )
+    db.add(job)
+    await db.commit()
+
+    return TrainingStatus(
+        experiment_id=experiment.id,
+        status="queued",
+        environment_id=config.environment_id,
+        algorithm=config.algorithm,
+        total_timesteps=config.total_timesteps,
+        job_id=arq_job.job_id,
+    )
 
 
 @router.get("/", response_model=list[TrainingStatus])
@@ -48,6 +90,21 @@ async def get_training(
     if session is None:
         raise HTTPException(status_code=404, detail="Experiment not found")
     return TrainingStatus(**session)
+
+
+@router.get("/{experiment_id}/job", response_model=JobResponse)
+async def get_training_job(
+    experiment_id: int,
+    _current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+) -> JobResponse:
+    result = await db.execute(
+        select(Job).where(Job.experiment_id == experiment_id)
+    )
+    job = result.scalar_one_or_none()
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found for this experiment")
+    return JobResponse.model_validate(job)
 
 
 @router.get("/{experiment_id}/result", response_model=TrainingResult)
