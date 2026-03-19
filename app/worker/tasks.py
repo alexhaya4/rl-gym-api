@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from datetime import UTC, datetime
 from functools import partial
 from typing import TYPE_CHECKING, Any
@@ -11,6 +12,7 @@ from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.evaluation import evaluate_policy
 
 from app.core.callbacks import WebSocketMetricsCallback, broadcast_training_metrics
+from app.core.prometheus import episode_reward, training_duration_seconds, training_jobs_total
 from app.db.session import AsyncSessionLocal
 from app.models.experiment import Experiment
 
@@ -50,6 +52,8 @@ async def run_training_job(
     config_dict: dict[str, Any],
 ) -> dict[str, Any]:
     """arq task: train an RL agent and persist results."""
+    algorithm = config_dict.get("algorithm", "unknown")
+    environment = config_dict.get("environment_id", "unknown")
     db: AsyncSession = AsyncSessionLocal()
     try:
         result = await db.execute(
@@ -61,6 +65,11 @@ async def run_training_job(
 
         experiment.status = "running"
         await db.commit()
+
+        training_jobs_total.labels(
+            algorithm=algorithm, environment=environment, status="started"
+        ).inc()
+        start_time = time.monotonic()
 
         metrics_queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
         callback = WebSocketMetricsCallback(
@@ -78,6 +87,17 @@ async def run_training_job(
         )
 
         await broadcast_task
+
+        duration = time.monotonic() - start_time
+        training_jobs_total.labels(
+            algorithm=algorithm, environment=environment, status="completed"
+        ).inc()
+        training_duration_seconds.labels(
+            algorithm=algorithm, environment=environment
+        ).observe(duration)
+        episode_reward.labels(
+            environment=environment, algorithm=algorithm
+        ).observe(training_result["mean_reward"])
 
         experiment.mean_reward = training_result["mean_reward"]
         experiment.std_reward = training_result["std_reward"]
@@ -97,6 +117,9 @@ async def run_training_job(
             "mean_reward": training_result["mean_reward"],
         }
     except Exception:
+        training_jobs_total.labels(
+            algorithm=algorithm, environment=environment, status="failed"
+        ).inc()
         try:
             result = await db.execute(
                 select(Experiment).where(Experiment.id == experiment_id)

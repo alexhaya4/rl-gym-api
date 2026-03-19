@@ -7,6 +7,7 @@ import grpc
 import numpy as np
 from sqlalchemy import select
 
+from app.core.prometheus import grpc_latency_microseconds, grpc_requests_total
 from app.db.session import AsyncSessionLocal
 from app.models.model_version import ModelVersion
 from app.services.model_storage import load_model
@@ -36,34 +37,42 @@ class InferenceServicer(inference_pb2_grpc.InferenceServiceServicer):  # type: i
     ) -> inference_pb2.PredictResponse:
         start = time.perf_counter_ns()
 
-        experiment_id = request.experiment_id
-        version = request.model_version if request.model_version > 0 else None
-        cache_key = _cache_key(experiment_id, version or 0)
+        try:
+            experiment_id = request.experiment_id
+            version = request.model_version if request.model_version > 0 else None
+            cache_key = _cache_key(experiment_id, version or 0)
 
-        if cache_key not in _model_cache:
-            async with AsyncSessionLocal() as db:
-                try:
-                    model, model_version = await load_model(
-                        db, experiment_id, version
-                    )
-                    _model_cache[cache_key] = (model, model_version)
-                except ValueError as e:
-                    await context.abort(grpc.StatusCode.NOT_FOUND, str(e))
+            if cache_key not in _model_cache:
+                async with AsyncSessionLocal() as db:
+                    try:
+                        model, model_version = await load_model(
+                            db, experiment_id, version
+                        )
+                        _model_cache[cache_key] = (model, model_version)
+                    except ValueError as e:
+                        grpc_requests_total.labels(method="Predict", status="error").inc()
+                        await context.abort(grpc.StatusCode.NOT_FOUND, str(e))
 
-        model, model_version = _model_cache[cache_key]
+            model, model_version = _model_cache[cache_key]
 
-        obs = np.array(list(request.observation), dtype=np.float32)
-        action, _ = model.predict(obs, deterministic=request.deterministic)
+            obs = np.array(list(request.observation), dtype=np.float32)
+            action, _ = model.predict(obs, deterministic=request.deterministic)
 
-        action_list = action.flatten().tolist() if hasattr(action, "flatten") else [float(action)]
-        latency_us = (time.perf_counter_ns() - start) // 1000
+            action_list = action.flatten().tolist() if hasattr(action, "flatten") else [float(action)]
+            latency_us = (time.perf_counter_ns() - start) // 1000
 
-        return inference_pb2.PredictResponse(
-            action=action_list,
-            confidence=1.0,
-            latency_us=latency_us,
-            model_version=str(model_version.version),
-        )
+            grpc_requests_total.labels(method="Predict", status="success").inc()
+            grpc_latency_microseconds.labels(method="Predict").observe(latency_us)
+
+            return inference_pb2.PredictResponse(
+                action=action_list,
+                confidence=1.0,
+                latency_us=latency_us,
+                model_version=str(model_version.version),
+            )
+        except Exception:
+            grpc_requests_total.labels(method="Predict", status="error").inc()
+            raise
 
     async def BatchPredict(  # noqa: N802
         self,
@@ -71,6 +80,8 @@ class InferenceServicer(inference_pb2_grpc.InferenceServiceServicer):  # type: i
         context: grpc.aio.ServicerContext,
     ) -> inference_pb2.BatchPredictResponse:
         start = time.perf_counter_ns()
+
+        grpc_requests_total.labels(method="BatchPredict", status="success").inc()
 
         responses = []
         for req in request.requests:
@@ -89,6 +100,8 @@ class InferenceServicer(inference_pb2_grpc.InferenceServiceServicer):  # type: i
         request: inference_pb2.ModelInfoRequest,
         context: grpc.aio.ServicerContext,
     ) -> inference_pb2.ModelInfoResponse:
+        grpc_requests_total.labels(method="GetModelInfo", status="success").inc()
+
         async with AsyncSessionLocal() as db:
             query = select(ModelVersion).where(
                 ModelVersion.experiment_id == request.experiment_id

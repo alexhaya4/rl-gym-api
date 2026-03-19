@@ -3,6 +3,8 @@ from typing import Any
 import gymnasium as gym
 import numpy as np
 
+from app.core.prometheus import active_environments
+
 _environments: dict[str, gym.Env[Any, Any]] = {}
 _environment_ids: dict[str, str] = {}
 
@@ -55,6 +57,7 @@ def create_environment(env_key: str, environment_id: str, render_mode: str | Non
     env = gym.make(environment_id, **kwargs)
     _environments[env_key] = env
     _environment_ids[env_key] = environment_id
+    active_environments.inc()
     return {
         "observation_space": _space_to_dict(env.observation_space),
         "action_space": _space_to_dict(env.action_space),
@@ -92,6 +95,7 @@ def close_environment(env_key: str) -> bool:
     if env is None:
         return False
     env.close()
+    active_environments.dec()
     return True
 
 

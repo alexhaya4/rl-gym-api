@@ -3,10 +3,12 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette_prometheus import PrometheusMiddleware
+from starlette_prometheus.view import metrics as handle_metrics
 
 from app.api.v1 import router as v1_router
 from app.api.v1.websockets import router as ws_router
@@ -24,6 +26,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger = logging.getLogger(__name__)
     settings = get_settings()
     logger.info(f"RL Gym API starting up (environment={settings.ENVIRONMENT})")
+    # Initialize custom Prometheus metrics (register collectors on import)
+    import app.core.prometheus as _  # noqa: F811, F401
     await start_grpc_server(port=settings.GRPC_PORT)
     yield
     await stop_grpc_server()
@@ -81,6 +85,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(PrometheusMiddleware)
     app.add_middleware(RequestIDMiddleware)
 
     app.include_router(v1_router, prefix="/api/v1")
@@ -91,6 +96,10 @@ def create_app() -> FastAPI:
         from app.core.health import get_health_status
 
         return await get_health_status(db)
+
+    @app.get("/metrics")
+    async def metrics(request: Request) -> Response:
+        return handle_metrics(request)
 
     return app
 
