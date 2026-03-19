@@ -40,9 +40,9 @@ def _run_training_sync(config: dict[str, Any]) -> dict[str, Any]:
 
 
 async def run_training_job(
-    ctx: dict,
+    ctx: dict[str, Any],
     experiment_id: int,
-    config_dict: dict,
+    config_dict: dict[str, Any],
 ) -> dict[str, Any]:
     """arq task: train an RL agent and persist results."""
     db: AsyncSession = AsyncSessionLocal()

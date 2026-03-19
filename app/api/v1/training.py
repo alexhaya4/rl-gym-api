@@ -52,6 +52,8 @@ async def create_training(
         experiment.id,
         config_dict,
     )
+    if arq_job is None:
+        raise HTTPException(status_code=500, detail="Failed to enqueue training job")
 
     job = Job(
         id=arq_job.job_id,
