@@ -20,7 +20,7 @@ class Episode(Base):  # type: ignore[misc]
     episode_length: Mapped[int | None] = mapped_column(Integer, nullable=True)
     mean_reward: Mapped[float | None] = mapped_column(Float, nullable=True)
     std_reward: Mapped[float | None] = mapped_column(Float, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
     def __repr__(self) -> str:
         return f"<Episode(id={self.id}, experiment_id={self.experiment_id}, episode={self.episode_number})>"

@@ -22,9 +22,9 @@ class Experiment(Base):  # type: ignore[misc]
     hyperparameters: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     total_timesteps: Mapped[int | None] = mapped_column(Integer, nullable=True)
     user_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
-    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     mean_reward: Mapped[float | None] = mapped_column(Float, nullable=True)
     std_reward: Mapped[float | None] = mapped_column(Float, nullable=True)
 
