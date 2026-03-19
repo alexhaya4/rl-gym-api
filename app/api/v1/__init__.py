@@ -9,6 +9,7 @@ from app.api.v1.custom_environments import router as custom_environments_router
 from app.api.v1.environments import router as environments_router
 from app.api.v1.evaluation import router as evaluation_router
 from app.api.v1.experiments import router as experiments_router
+from app.api.v1.models import router as models_router
 from app.api.v1.training import router as training_router
 from app.api.v1.websockets import router as ws_router
 from app.config import get_settings
@@ -22,6 +23,7 @@ router.include_router(custom_environments_router)
 router.include_router(environments_router)
 router.include_router(training_router)
 router.include_router(experiments_router)
+router.include_router(models_router)
 router.include_router(benchmarks_router)
 router.include_router(evaluation_router)
 router.include_router(ws_router)

@@ -21,6 +21,15 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: str = "redis://localhost:6379"
 
+    # Model Storage
+    STORAGE_BACKEND: str = "local"
+    STORAGE_LOCAL_PATH: str = "./models"
+    AWS_ACCESS_KEY_ID: str | None = None
+    AWS_SECRET_ACCESS_KEY: str | None = None
+    AWS_REGION: str = "us-east-1"
+    S3_BUCKET_NAME: str | None = None
+    S3_ENDPOINT_URL: str | None = None
+
     # CORS
     ALLOWED_ORIGINS: str = "http://localhost:3000"
 
