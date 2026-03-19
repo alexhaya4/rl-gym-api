@@ -1,5 +1,6 @@
 import asyncio
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -83,9 +84,9 @@ class S3Storage(BaseStorage):
             kwargs["endpoint_url"] = endpoint_url
         self._client = boto3.client("s3", **kwargs)
 
-    def _run(self, fn, *args, **kwargs):  # type: ignore[no-untyped-def]
+    async def _run(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         loop = asyncio.get_event_loop()
-        return loop.run_in_executor(None, lambda: fn(*args, **kwargs))
+        return await loop.run_in_executor(None, lambda: fn(*args, **kwargs))
 
     async def save(self, file_path: str, data: bytes) -> str:
         await self._run(self._client.put_object, Bucket=self.bucket, Key=file_path, Body=data)
