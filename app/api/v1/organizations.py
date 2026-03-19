@@ -4,14 +4,13 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.dependencies import get_current_active_user
 from app.models.organization import Organization, OrganizationMember
 from app.models.subscription import Subscription
-from app.models.usage import UsageRecord
 from app.models.user import User
 from app.schemas.billing import UsageResponse
 from app.schemas.organization import (

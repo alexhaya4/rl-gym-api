@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,7 +13,6 @@ from app.models.subscription import Subscription
 from app.models.user import User
 from app.schemas.billing import (
     CheckoutSessionResponse,
-    CreateCheckoutSessionRequest,
     PlanInfo,
     SubscriptionResponse,
 )
@@ -117,7 +116,7 @@ async def stripe_webhook(
     try:
         result = await handle_webhook_event(payload, sig_header, db)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
     return result
 
