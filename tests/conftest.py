@@ -1,3 +1,4 @@
+import asyncio
 import os
 import uuid
 from collections.abc import AsyncGenerator
@@ -15,19 +16,27 @@ DATABASE_URL = os.environ.get("DATABASE_URL", "")
 _USE_POSTGRES = DATABASE_URL.startswith("postgresql")
 
 
+@pytest.fixture(scope="session", autouse=True)
+async def run_migrations() -> AsyncGenerator[None, None]:
+    """Run alembic migrations once per session when using PostgreSQL."""
+    if _USE_POSTGRES:
+        proc = await asyncio.create_subprocess_exec(
+            "alembic", "upgrade", "head",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        _stdout, stderr = await proc.communicate()
+        if proc.returncode != 0:
+            raise RuntimeError(
+                f"alembic upgrade head failed (rc={proc.returncode}): {stderr.decode()}"
+            )
+    yield
+
+
 @pytest.fixture
 async def client() -> AsyncGenerator[AsyncClient, None]:
     if _USE_POSTGRES:
         engine = create_async_engine(DATABASE_URL, echo=True)
-
-        # Run alembic migrations against the real PostgreSQL database
-        from alembic.config import Config
-
-        from alembic import command
-
-        alembic_cfg = Config("alembic.ini")
-        alembic_cfg.set_main_option("sqlalchemy.url", DATABASE_URL)
-        command.upgrade(alembic_cfg, "head")
     else:
         engine = create_async_engine("sqlite+aiosqlite://", echo=True)
 
