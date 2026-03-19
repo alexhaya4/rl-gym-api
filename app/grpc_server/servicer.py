@@ -26,7 +26,7 @@ def _cache_key(experiment_id: int, version: int) -> str:
     return f"{experiment_id}:{version}"
 
 
-class InferenceServicer(inference_pb2_grpc.InferenceServiceServicer):
+class InferenceServicer(inference_pb2_grpc.InferenceServiceServicer):  # type: ignore[misc]
     """gRPC servicer implementing the InferenceService."""
 
     async def Predict(  # noqa: N802
@@ -106,6 +106,7 @@ class InferenceServicer(inference_pb2_grpc.InferenceServiceServicer):
                 grpc.StatusCode.NOT_FOUND,
                 f"No model found for experiment {request.experiment_id}",
             )
+            return inference_pb2.ModelInfoResponse()
 
         return inference_pb2.ModelInfoResponse(
             experiment_id=mv.experiment_id,
