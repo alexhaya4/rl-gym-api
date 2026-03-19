@@ -6,9 +6,9 @@ from datetime import UTC, datetime
 from typing import Any
 
 import gymnasium as gym
+from sqlalchemy.ext.asyncio import AsyncSession
 from stable_baselines3 import A2C, DQN, PPO
 from stable_baselines3.common.evaluation import evaluate_policy
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.ray_utils import is_ray_available
 from app.models.experiment import Experiment
@@ -78,7 +78,7 @@ else:
 def _generate_combinations(grid: dict[str, list[Any]]) -> list[dict[str, Any]]:
     keys = list(grid.keys())
     values = list(grid.values())
-    return [dict(zip(keys, combo)) for combo in itertools.product(*values)]
+    return [dict(zip(keys, combo, strict=False)) for combo in itertools.product(*values)]
 
 
 async def run_distributed_training(

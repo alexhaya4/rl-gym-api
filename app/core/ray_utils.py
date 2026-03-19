@@ -41,7 +41,6 @@ def get_ray_dashboard_url() -> str | None:
         import ray
 
         if ray.is_initialized():
-            context = ray.get_runtime_context()
             dashboard_url = ray.get_dashboard_url()
             return f"http://{dashboard_url}" if dashboard_url else None
     except Exception:

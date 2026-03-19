@@ -3,7 +3,6 @@ import itertools
 import pytest
 from httpx import AsyncClient
 
-from app.core.ray_utils import is_ray_available
 from app.schemas.ray_training import HyperparameterGrid
 
 

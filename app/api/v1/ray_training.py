@@ -7,7 +7,10 @@ from app.core.ray_utils import get_ray_address, get_ray_dashboard_url, is_ray_av
 from app.db.session import get_db
 from app.dependencies import get_current_active_user
 from app.models.user import User
-from app.schemas.ray_training import DistributedTrainingRequest, DistributedTrainingResponse
+from app.schemas.ray_training import (
+    DistributedTrainingRequest,
+    DistributedTrainingResponse,
+)
 from app.services.ray_training import run_distributed_training
 
 router = APIRouter(prefix="/distributed", tags=["distributed-training"])
