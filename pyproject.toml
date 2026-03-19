@@ -41,6 +41,7 @@ dependencies = [
     "prometheus-client>=0.20,<1",
     "starlette-prometheus>=0.3,<1",
     "stripe>=8.0,<9",
+    "ray[tune]>=2.9,<3",
 ]
 
 [project.optional-dependencies]

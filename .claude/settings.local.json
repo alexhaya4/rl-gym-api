@@ -24,7 +24,8 @@
       "Bash(python -m pytest tests/ -v 2>&1 | tail -10)",
       "Bash(python -m grpc_tools.protoc -I proto/ --python_out=proto/ --grpc_python_out=proto/ proto/inference.proto && python -m pytest tests/ -v 2>&1 | tail -15)",
       "Bash(cd C:/Users/HP/rl-gym-api && python -m pytest tests/ -v --cov=app --cov-report=term-missing 2>&1)",
-      "Bash(cd C:/Users/HP/rl-gym-api && python -m pytest tests/test_organizations.py tests/test_billing.py -v 2>&1)"
+      "Bash(cd C:/Users/HP/rl-gym-api && python -m pytest tests/test_organizations.py tests/test_billing.py -v 2>&1)",
+      "Bash(cd C:/Users/HP/rl-gym-api && python -m pytest tests/test_ray_training.py -v 2>&1)"
     ]
   }
 }

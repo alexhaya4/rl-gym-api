@@ -48,6 +48,9 @@ class Settings(BaseSettings):
     PRO_TIER_MAX_ENVIRONMENTS: int = 20
     PRO_TIER_MAX_TIMESTEPS: int = 5000000
 
+    # Ray
+    RAY_ADDRESS: str | None = None
+
     # CORS
     ALLOWED_ORIGINS: str = "http://localhost:3000"
 

@@ -31,6 +31,7 @@ services:
       - .env
     environment:
       REDIS_URL: redis://redis:6379
+      RAY_ADDRESS: ray://ray-head:10001
     depends_on:
       api:
         condition: service_started
@@ -67,6 +68,25 @@ services:
       timeout: 5s
       start_period: 5s
       retries: 5
+
+  ray-head:
+    image: rayproject/ray:latest
+    command: ray start --head --port=6379 --dashboard-host=0.0.0.0 --block
+    ports:
+      - "8265:8265"
+      - "6380:6379"
+    shm_size: 2gb
+    restart: unless-stopped
+
+  ray-worker:
+    image: rayproject/ray:latest
+    command: ray start --address=ray-head:6379 --block
+    depends_on:
+      - ray-head
+    shm_size: 2gb
+    deploy:
+      replicas: 2
+    restart: unless-stopped
 
   prometheus:
     image: prom/prometheus:latest
