@@ -33,6 +33,7 @@ class ExperimentResponse(ExperimentBase):
     completed_at: datetime | None
     mean_reward: float | None
     std_reward: float | None
+    metrics_summary: dict[str, Any] | None = None
 
 
 class ExperimentListResponse(BaseModel):

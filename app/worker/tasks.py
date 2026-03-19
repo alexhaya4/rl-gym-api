@@ -1,18 +1,21 @@
 import asyncio
 import logging
 from datetime import UTC, datetime
+from functools import partial
 from typing import TYPE_CHECKING, Any
 
 import gymnasium as gym
 from sqlalchemy import select
 from stable_baselines3 import A2C, DQN, PPO
+from stable_baselines3.common.callbacks import BaseCallback
+from stable_baselines3.common.evaluation import evaluate_policy
+
+from app.core.callbacks import WebSocketMetricsCallback, broadcast_training_metrics
+from app.db.session import AsyncSessionLocal
+from app.models.experiment import Experiment
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
-from stable_baselines3.common.evaluation import evaluate_policy
-
-from app.db.session import AsyncSessionLocal
-from app.models.experiment import Experiment
 
 logger = logging.getLogger(__name__)
 
@@ -23,13 +26,15 @@ ALGORITHMS: dict[str, type] = {
 }
 
 
-def _run_training_sync(config: dict[str, Any]) -> dict[str, Any]:
+def _run_training_sync(
+    config: dict[str, Any], callback: BaseCallback
+) -> dict[str, Any]:
     """Blocking SB3 training + evaluation — meant to run in an executor."""
     env = gym.make(config["environment_id"])
     algo_class = ALGORITHMS[config["algorithm"]]
     model = algo_class("MlpPolicy", env, **config.get("hyperparameters", {}))
 
-    model.learn(total_timesteps=config["total_timesteps"])
+    model.learn(total_timesteps=config["total_timesteps"], callback=callback)
 
     raw_mean, raw_std = evaluate_policy(model, env, n_eval_episodes=10)
     mean_reward = float(raw_mean) if isinstance(raw_mean, float) else float(raw_mean[0])
@@ -57,10 +62,22 @@ async def run_training_job(
         experiment.status = "running"
         await db.commit()
 
+        metrics_queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
+        callback = WebSocketMetricsCallback(
+            experiment_id=str(experiment_id),
+            metrics_queue=metrics_queue,
+        )
+
+        broadcast_task = asyncio.create_task(
+            broadcast_training_metrics(str(experiment_id), metrics_queue)
+        )
+
         loop = asyncio.get_event_loop()
         training_result = await loop.run_in_executor(
-            None, _run_training_sync, config_dict
+            None, partial(_run_training_sync, config_dict, callback)
         )
+
+        await broadcast_task
 
         experiment.mean_reward = training_result["mean_reward"]
         experiment.std_reward = training_result["std_reward"]

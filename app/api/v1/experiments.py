@@ -83,7 +83,15 @@ async def get_experiment_endpoint(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Experiment not found"
         )
-    return ExperimentResponse.model_validate(experiment)
+    response = ExperimentResponse.model_validate(experiment)
+    if experiment.status == "completed" and experiment.mean_reward is not None:
+        response.metrics_summary = {
+            "min_episode_reward": experiment.mean_reward - (experiment.std_reward or 0),
+            "max_episode_reward": experiment.mean_reward + (experiment.std_reward or 0),
+            "mean_episode_reward": experiment.mean_reward,
+            "total_timesteps": experiment.total_timesteps,
+        }
+    return response
 
 
 @router.patch("/{experiment_id}", response_model=ExperimentResponse)
