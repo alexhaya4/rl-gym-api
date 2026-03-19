@@ -43,7 +43,8 @@ class WebSocketMetricsCallback(BaseCallback):
                 metrics["entropy"] = float(entropy)
 
         if hasattr(self.model, "learning_rate"):
-            metrics["learning_rate"] = float(self.model.learning_rate)
+            lr = self.model.learning_rate
+            metrics["learning_rate"] = float(lr) if not callable(lr) else None
 
         self.metrics_queue.put_nowait(metrics)
         return True
