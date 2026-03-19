@@ -119,7 +119,7 @@ async def handle_webhook_event(
         return {"status": "skipped", "reason": "Stripe not configured"}
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
-    event = stripe.Webhook.construct_event(
+    event = stripe.Webhook.construct_event(  # type: ignore[no-untyped-call]
         payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
     )
 
