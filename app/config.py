@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     S3_BUCKET_NAME: str | None = None
     S3_ENDPOINT_URL: str | None = None
 
+    # gRPC
+    GRPC_PORT: int = 50051
+
     # CORS
     ALLOWED_ORIGINS: str = "http://localhost:3000"
 

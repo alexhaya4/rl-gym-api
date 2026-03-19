@@ -57,6 +57,7 @@ jobs:
       ENVIRONMENT: test
       DATABASE_URL: postgresql+asyncpg://rl_gym:rl_gym@localhost:5432/rl_gym
       REDIS_URL: redis://localhost:6379
+      GRPC_PORT: 50051
 
     steps:
       - uses: actions/checkout@v4

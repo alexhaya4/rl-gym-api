@@ -14,6 +14,7 @@ from app.config import get_settings
 from app.core.logging import RequestIDMiddleware, configure_logging
 from app.core.rate_limit import limiter, rate_limit_exceeded_handler
 from app.db.session import get_db
+from app.grpc_server.server import start_grpc_server, stop_grpc_server
 
 VERSION = "0.1.0"
 
@@ -23,7 +24,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger = logging.getLogger(__name__)
     settings = get_settings()
     logger.info(f"RL Gym API starting up (environment={settings.ENVIRONMENT})")
+    await start_grpc_server(port=settings.GRPC_PORT)
     yield
+    await stop_grpc_server()
 
 
 def create_app() -> FastAPI:

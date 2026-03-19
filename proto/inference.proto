@@ -1,0 +1,46 @@
+syntax = "proto3";
+package inference;
+
+service InferenceService {
+  rpc Predict (PredictRequest) returns (PredictResponse);
+  rpc BatchPredict (BatchPredictRequest) returns (BatchPredictResponse);
+  rpc GetModelInfo (ModelInfoRequest) returns (ModelInfoResponse);
+}
+
+message PredictRequest {
+  int32 experiment_id = 1;
+  repeated float observation = 2;
+  bool deterministic = 3;
+  int32 model_version = 4;
+}
+
+message PredictResponse {
+  repeated float action = 1;
+  float confidence = 2;
+  int64 latency_us = 3;
+  string model_version = 4;
+}
+
+message BatchPredictRequest {
+  int32 experiment_id = 1;
+  repeated PredictRequest requests = 2;
+}
+
+message BatchPredictResponse {
+  repeated PredictResponse responses = 1;
+  int64 total_latency_us = 2;
+}
+
+message ModelInfoRequest {
+  int32 experiment_id = 1;
+  int32 version = 2;
+}
+
+message ModelInfoResponse {
+  int32 experiment_id = 1;
+  int32 version = 2;
+  string algorithm = 3;
+  float mean_reward = 4;
+  int32 total_timesteps = 5;
+  string created_at = 6;
+}
