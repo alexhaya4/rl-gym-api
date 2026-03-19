@@ -33,6 +33,21 @@ class Settings(BaseSettings):
     # gRPC
     GRPC_PORT: int = 50051
 
+    # Stripe
+    STRIPE_SECRET_KEY: str | None = None
+    STRIPE_WEBHOOK_SECRET: str | None = None
+    STRIPE_FREE_PRICE_ID: str | None = None
+    STRIPE_PRO_PRICE_ID: str | None = None
+    STRIPE_ENTERPRISE_PRICE_ID: str | None = None
+
+    # Tier Limits
+    FREE_TIER_MAX_EXPERIMENTS: int = 5
+    FREE_TIER_MAX_ENVIRONMENTS: int = 3
+    FREE_TIER_MAX_TIMESTEPS: int = 50000
+    PRO_TIER_MAX_EXPERIMENTS: int = 100
+    PRO_TIER_MAX_ENVIRONMENTS: int = 20
+    PRO_TIER_MAX_TIMESTEPS: int = 5000000
+
     # CORS
     ALLOWED_ORIGINS: str = "http://localhost:3000"
 
