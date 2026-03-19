@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 import time
 from typing import Any
@@ -12,8 +13,8 @@ from app.db.session import AsyncSessionLocal
 from app.models.model_version import ModelVersion
 from app.services.model_storage import load_model
 
-# Ensure proto/ is importable
-sys.path.insert(0, "proto")
+# Ensure proto/ is importable (works both locally and in Docker)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "proto"))
 import inference_pb2
 import inference_pb2_grpc
 

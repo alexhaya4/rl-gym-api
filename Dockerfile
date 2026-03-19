@@ -27,6 +27,7 @@ COPY --from=builder /install /usr/local
 WORKDIR /home/appuser/app
 
 COPY app/ app/
+COPY proto/ proto/
 COPY alembic/ alembic/
 COPY alembic.ini .
 
