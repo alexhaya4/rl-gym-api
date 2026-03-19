@@ -67,12 +67,11 @@ def _train_single_trial_impl(
 
 
 # Create Ray remote version if available
+train_single_trial: Any = None
 if is_ray_available():
     import ray
 
     train_single_trial = ray.remote(_train_single_trial_impl)
-else:
-    train_single_trial = None
 
 
 def _generate_combinations(grid: dict[str, list[Any]]) -> list[dict[str, Any]]:
@@ -90,7 +89,7 @@ async def run_distributed_training(
     experiment_name = request.experiment_name or f"distributed-{job_id[:8]}"
     started_at = datetime.now(UTC).isoformat()
 
-    grid = {
+    grid: dict[str, list[Any]] = {
         "learning_rate": request.hyperparameter_grid.learning_rate,
         "n_steps": request.hyperparameter_grid.n_steps,
         "batch_size": request.hyperparameter_grid.batch_size,
