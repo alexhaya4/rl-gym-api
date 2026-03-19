@@ -21,7 +21,8 @@
       "Bash(python -m pytest tests/ -v 2>&1 | tail -20)",
       "Bash(python -m pytest tests/test_training.py::test_list_training_sessions -v 2>&1 | tail -30)",
       "Bash(python -m pytest tests/test_training.py::test_list_training_sessions -v 2>&1 | grep \"IntegrityError\\\\|FAILED\\\\|Error\")",
-      "Bash(python -m pytest tests/ -v 2>&1 | tail -10)"
+      "Bash(python -m pytest tests/ -v 2>&1 | tail -10)",
+      "Bash(python -m grpc_tools.protoc -I proto/ --python_out=proto/ --grpc_python_out=proto/ proto/inference.proto && python -m pytest tests/ -v 2>&1 | tail -15)"
     ]
   }
 }
