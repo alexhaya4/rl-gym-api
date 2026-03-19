@@ -12,7 +12,11 @@ from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.evaluation import evaluate_policy
 
 from app.core.callbacks import WebSocketMetricsCallback, broadcast_training_metrics
-from app.core.prometheus import episode_reward, training_duration_seconds, training_jobs_total
+from app.core.prometheus import (
+    episode_reward,
+    training_duration_seconds,
+    training_jobs_total,
+)
 from app.db.session import AsyncSessionLocal
 from app.models.experiment import Experiment
 

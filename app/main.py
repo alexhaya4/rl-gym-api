@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     logger.info(f"RL Gym API starting up (environment={settings.ENVIRONMENT})")
     # Initialize custom Prometheus metrics (register collectors on import)
-    import app.core.prometheus as _  # noqa: F811, F401
+    import app.core.prometheus as _  # noqa: F401
     await start_grpc_server(port=settings.GRPC_PORT)
     yield
     await stop_grpc_server()
