@@ -6,24 +6,22 @@ from typing import Any
 import gymnasium as gym
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from stable_baselines3 import A2C, DQN, PPO
 from stable_baselines3.common.evaluation import evaluate_policy
 
+from app.core.algorithms import get_algorithm_class, validate_algorithm_environment
 from app.models.experiment import Experiment
 from app.schemas.training import TrainingConfig
 
 _training_sessions: dict[int, dict[str, Any]] = {}
 
-ALGORITHMS = {
-    "PPO": PPO,
-    "A2C": A2C,
-    "DQN": DQN,
-}
-
 
 def _run_training(config: TrainingConfig) -> dict[str, Any]:
+    compatible, error = validate_algorithm_environment(config.algorithm, config.environment_id)
+    if not compatible:
+        raise ValueError(error)
+
     env = gym.make(config.environment_id)
-    algo_class = ALGORITHMS[config.algorithm]
+    algo_class = get_algorithm_class(config.algorithm)
     model = algo_class("MlpPolicy", env, **config.hyperparameters)
 
     start_time = time.time()

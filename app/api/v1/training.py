@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.algorithms import ALL_ALGORITHMS, validate_algorithm_environment
 from app.db.session import get_db
 from app.dependencies import get_arq_redis, get_current_active_user
 from app.models.experiment import Experiment
@@ -22,10 +23,17 @@ async def create_training(
     db: AsyncSession = Depends(get_db),
     arq_redis: ArqRedis = Depends(get_arq_redis),
 ) -> TrainingStatus:
-    if config.algorithm not in ("PPO", "A2C", "DQN"):
+    if config.algorithm not in ALL_ALGORITHMS:
         raise HTTPException(
-            status_code=400, detail="Unsupported algorithm. Use PPO, A2C, or DQN."
+            status_code=400,
+            detail=f"Unsupported algorithm: {config.algorithm}. "
+            f"Available: {sorted(ALL_ALGORITHMS)}",
         )
+    compatible, error = validate_algorithm_environment(
+        config.algorithm, config.environment_id
+    )
+    if not compatible:
+        raise HTTPException(status_code=400, detail=error)
 
     experiment = Experiment(
         name=config.experiment_name or f"{config.algorithm}_{config.environment_id}",

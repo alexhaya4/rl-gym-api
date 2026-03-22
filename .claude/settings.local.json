@@ -31,7 +31,13 @@
       "Bash(python -c \"import ast; ast.parse\\(open\\(''app/api/v1/pipelines.py''\\).read\\(\\)\\); ast.parse\\(open\\(''app/api/v1/__init__.py''\\).read\\(\\)\\); print\\(''OK''\\)\")",
       "Bash(python -m pytest tests/test_pipelines.py -v)",
       "Bash(taskkill /f /im python.exe)",
-      "Bash(python -c \"import ast; ast.parse\\(open\\(''app/services/optuna_optimization.py''\\).read\\(\\)\\); print\\(''OK''\\)\")"
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''app/services/optuna_optimization.py''\\).read\\(\\)\\); print\\(''OK''\\)\")",
+      "Bash(python -c \"from app.core.algorithms import get_algorithm_class, ALL_ALGORITHMS; print\\(f''{len\\(ALL_ALGORITHMS\\)} algorithms''\\); cls = get_algorithm_class\\(''TQC''\\); print\\(f''TQC: {cls}''\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''app/services/training.py''\\).read\\(\\)\\); ast.parse\\(open\\(''app/worker/tasks.py''\\).read\\(\\)\\); print\\(''OK''\\)\")",
+      "Bash(python -m pytest tests/test_training.py -v)",
+      "Bash(python -m pytest tests/test_benchmarks.py tests/test_training.py -v)",
+      "Bash(python -m pytest tests/test_environments.py tests/test_benchmarks.py -v)",
+      "Bash(python -m pytest tests/test_environments.py tests/test_benchmarks.py tests/test_training.py -v)"
     ]
   }
 }

@@ -45,6 +45,7 @@ dependencies = [
     "prefect>=3.0,<4",
     "optuna>=3.6,<4",
     "optuna-integration[sqlalchemy]>=3.6,<4",
+    "sb3-contrib>=2.4,<3",
 ]
 
 [project.optional-dependencies]

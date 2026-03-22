@@ -14,7 +14,19 @@ AVAILABLE_ENVIRONMENTS = [
     "MountainCar-v0",
     "Acrobot-v1",
     "Pendulum-v1",
+    "MountainCarContinuous-v0",
+    "LunarLanderContinuous-v2",
 ]
+
+ENVIRONMENT_ACTION_SPACES: dict[str, str] = {
+    "CartPole-v1": "discrete",
+    "LunarLander-v3": "discrete",
+    "MountainCar-v0": "discrete",
+    "Acrobot-v1": "discrete",
+    "Pendulum-v1": "continuous",
+    "MountainCarContinuous-v0": "continuous",
+    "LunarLanderContinuous-v2": "continuous",
+}
 
 
 def _space_to_dict(space: gym.Space[Any]) -> dict[str, Any]:
@@ -106,5 +118,11 @@ def list_environments() -> list[dict[str, str]]:
     ]
 
 
-def get_available_environments() -> list[str]:
-    return AVAILABLE_ENVIRONMENTS
+def get_available_environments() -> list[dict[str, str]]:
+    return [
+        {
+            "environment_id": env_id,
+            "action_space_type": ENVIRONMENT_ACTION_SPACES.get(env_id, "unknown"),
+        }
+        for env_id in AVAILABLE_ENVIRONMENTS
+    ]

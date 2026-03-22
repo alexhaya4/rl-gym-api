@@ -22,7 +22,9 @@ async def test_get_available_environments(client: AsyncClient) -> None:
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
-    assert "CartPole-v1" in data
+    env_ids = [e["environment_id"] for e in data]
+    assert "CartPole-v1" in env_ids
+    assert all("action_space_type" in e for e in data)
 
 
 async def test_create_environment(client: AsyncClient, auth_headers: dict[str, str]) -> None:

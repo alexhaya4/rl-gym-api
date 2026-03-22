@@ -25,7 +25,7 @@ router = APIRouter(prefix="/environments", tags=["environments"])
 
 
 @router.get("/available")
-async def available() -> list[str]:
+async def available() -> list[dict[str, str]]:
     return get_available_environments()
 
 

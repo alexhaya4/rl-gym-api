@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING, Any
 
 import gymnasium as gym
 from sqlalchemy import select
-from stable_baselines3 import A2C, DQN, PPO
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.evaluation import evaluate_policy
 
+from app.core.algorithms import get_algorithm_class, validate_algorithm_environment
 from app.core.callbacks import WebSocketMetricsCallback, broadcast_training_metrics
 from app.core.prometheus import (
     episode_reward,
@@ -25,19 +25,19 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-ALGORITHMS: dict[str, type] = {
-    "PPO": PPO,
-    "A2C": A2C,
-    "DQN": DQN,
-}
-
 
 def _run_training_sync(
     config: dict[str, Any], callback: BaseCallback
 ) -> dict[str, Any]:
     """Blocking SB3 training + evaluation — meant to run in an executor."""
+    compatible, error = validate_algorithm_environment(
+        config["algorithm"], config["environment_id"]
+    )
+    if not compatible:
+        raise ValueError(error)
+
     env = gym.make(config["environment_id"])
-    algo_class = ALGORITHMS[config["algorithm"]]
+    algo_class = get_algorithm_class(config["algorithm"])
     model = algo_class("MlpPolicy", env, **config.get("hyperparameters", {}))
 
     model.learn(total_timesteps=config["total_timesteps"], callback=callback)

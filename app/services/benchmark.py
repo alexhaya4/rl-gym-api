@@ -4,16 +4,14 @@ import uuid
 from datetime import UTC, datetime
 
 import gymnasium as gym
-from stable_baselines3 import A2C, DQN, PPO
 from stable_baselines3.common.evaluation import evaluate_policy
 
+from app.core.algorithms import (
+    ALL_ALGORITHMS,
+    get_algorithm_class,
+    validate_algorithm_environment,
+)
 from app.schemas.benchmark import BenchmarkRequest, BenchmarkResponse, BenchmarkResult
-
-ALGORITHMS = {
-    "PPO": PPO,
-    "A2C": A2C,
-    "DQN": DQN,
-}
 
 
 def _train_and_evaluate(
@@ -22,9 +20,13 @@ def _train_and_evaluate(
     total_timesteps: int,
     n_eval_episodes: int,
 ) -> BenchmarkResult:
+    compatible, error = validate_algorithm_environment(algorithm, environment_id)
+    if not compatible:
+        raise ValueError(error)
+
     env = gym.make(environment_id)
     try:
-        algo_class = ALGORITHMS[algorithm]
+        algo_class = get_algorithm_class(algorithm)
         model = algo_class("MlpPolicy", env)
 
         start_time = time.time()

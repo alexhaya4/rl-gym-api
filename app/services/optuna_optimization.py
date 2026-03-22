@@ -8,10 +8,9 @@ import gymnasium as gym
 import optuna
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from stable_baselines3 import A2C, DQN, PPO
-from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.evaluation import evaluate_policy
 
+from app.core.algorithms import get_algorithm_class
 from app.models.optuna_study import OptunaStudy
 from app.schemas.optuna import OptimizationRequest, OptimizationResponse, TrialInfo
 
@@ -19,12 +18,6 @@ logger = logging.getLogger(__name__)
 
 # In-memory cache of completed studies for history queries
 _study_cache: dict[str, optuna.Study] = {}
-
-ALGORITHMS: dict[str, type[BaseAlgorithm]] = {
-    "PPO": PPO,
-    "A2C": A2C,
-    "DQN": DQN,
-}
 
 DEFAULT_HYPERPARAMETER_SPACES: dict[str, dict[str, dict[str, Any]]] = {
     "PPO": {
@@ -44,6 +37,30 @@ DEFAULT_HYPERPARAMETER_SPACES: dict[str, dict[str, dict[str, Any]]] = {
         "batch_size": {"type": "int", "low": 32, "high": 256},
         "gamma": {"type": "float", "low": 0.9, "high": 0.9999},
         "exploration_fraction": {"type": "float", "low": 0.1, "high": 0.5},
+    },
+    "SAC": {
+        "learning_rate": {"type": "float", "low": 1e-5, "high": 1e-2, "log": True},
+        "batch_size": {"type": "int", "low": 64, "high": 512},
+        "gamma": {"type": "float", "low": 0.9, "high": 0.9999},
+        "tau": {"type": "float", "low": 0.001, "high": 0.1},
+    },
+    "TD3": {
+        "learning_rate": {"type": "float", "low": 1e-5, "high": 1e-2, "log": True},
+        "batch_size": {"type": "int", "low": 64, "high": 512},
+        "gamma": {"type": "float", "low": 0.9, "high": 0.9999},
+        "tau": {"type": "float", "low": 0.001, "high": 0.1},
+    },
+    "DDPG": {
+        "learning_rate": {"type": "float", "low": 1e-5, "high": 1e-2, "log": True},
+        "batch_size": {"type": "int", "low": 64, "high": 512},
+        "gamma": {"type": "float", "low": 0.9, "high": 0.9999},
+        "tau": {"type": "float", "low": 0.001, "high": 0.1},
+    },
+    "TQC": {
+        "learning_rate": {"type": "float", "low": 1e-5, "high": 1e-2, "log": True},
+        "batch_size": {"type": "int", "low": 64, "high": 512},
+        "gamma": {"type": "float", "low": 0.9, "high": 0.9999},
+        "top_quantiles_to_drop_per_net": {"type": "int", "low": 2, "high": 5},
     },
 }
 
@@ -79,7 +96,7 @@ def create_objective(
 
         env = gym.make(environment_id)
         try:
-            algo_class = ALGORITHMS[algorithm]
+            algo_class = get_algorithm_class(algorithm)
             model = algo_class("MlpPolicy", env, **params)
             model.learn(total_timesteps=total_timesteps)
 
@@ -279,7 +296,7 @@ def _evaluate_default(
     """Train with default hyperparameters and return mean reward."""
     env = gym.make(environment_id)
     try:
-        algo_class = ALGORITHMS[algorithm]
+        algo_class = get_algorithm_class(algorithm)
         model = algo_class("MlpPolicy", env, learning_rate=3e-4)
         model.learn(total_timesteps=total_timesteps)
         raw_mean, _ = evaluate_policy(model, env, n_eval_episodes=n_eval_episodes)

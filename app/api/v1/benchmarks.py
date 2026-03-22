@@ -1,21 +1,13 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from app.core.algorithms import ALL_ALGORITHMS, SUPPORTED_ALGORITHMS
 from app.dependencies import get_current_active_user
 from app.models.user import User
 from app.schemas.benchmark import BenchmarkRequest, BenchmarkResponse
-from app.services.benchmark import ALGORITHMS
 from app.services.environment import AVAILABLE_ENVIRONMENTS
 
 router = APIRouter(prefix="/benchmarks", tags=["benchmarks"])
-
-SUPPORTED_ALGORITHMS = list(ALGORITHMS.keys())
-
-ALGORITHM_DESCRIPTIONS = {
-    "PPO": "Proximal Policy Optimization — general-purpose, stable on-policy algorithm",
-    "A2C": "Advantage Actor-Critic — fast synchronous on-policy algorithm",
-    "DQN": "Deep Q-Network — off-policy algorithm for discrete action spaces",
-}
 
 
 @router.post("/run", response_model=BenchmarkResponse)
@@ -32,12 +24,12 @@ async def run_benchmark_endpoint(
             f"Allowed: {AVAILABLE_ENVIRONMENTS}",
         )
 
-    invalid_algos = [a for a in request.algorithms if a not in SUPPORTED_ALGORITHMS]
+    invalid_algos = [a for a in request.algorithms if a not in ALL_ALGORITHMS]
     if invalid_algos:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid algorithms: {invalid_algos}. "
-            f"Allowed: {SUPPORTED_ALGORITHMS}",
+            f"Allowed: {sorted(ALL_ALGORITHMS)}",
         )
 
     from app.services.benchmark import run_benchmark
@@ -56,7 +48,7 @@ async def list_benchmark_algorithms() -> dict[str, list[dict[str, str]]]:
     """List supported algorithms with brief descriptions."""
     return {
         "algorithms": [
-            {"name": name, "description": ALGORITHM_DESCRIPTIONS[name]}
-            for name in SUPPORTED_ALGORITHMS
+            {"name": name, "description": info["description"]}
+            for name, info in SUPPORTED_ALGORITHMS.items()
         ]
     }
