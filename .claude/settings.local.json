@@ -39,7 +39,8 @@
       "Bash(python -m pytest tests/test_environments.py tests/test_benchmarks.py -v)",
       "Bash(python -m pytest tests/test_environments.py tests/test_benchmarks.py tests/test_training.py -v)",
       "Bash(python -c \"import ast; ast.parse\\(open\\(''app/api/v1/multi_agent.py''\\).read\\(\\)\\); ast.parse\\(open\\(''app/api/v1/__init__.py''\\).read\\(\\)\\); print\\(''OK''\\)\")",
-      "Bash(python -m pytest tests/test_multi_agent.py -v)"
+      "Bash(python -m pytest tests/test_multi_agent.py -v)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''app/api/v1/vec_environments.py''\\).read\\(\\)\\); ast.parse\\(open\\(''app/api/v1/__init__.py''\\).read\\(\\)\\); print\\(''OK''\\)\")"
     ]
   }
 }

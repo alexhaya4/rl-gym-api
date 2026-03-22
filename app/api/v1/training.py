@@ -53,6 +53,7 @@ async def create_training(
         "algorithm": config.algorithm,
         "total_timesteps": config.total_timesteps,
         "hyperparameters": config.hyperparameters,
+        "n_envs": config.n_envs,
     }
 
     arq_job = await arq_redis.enqueue_job(

@@ -8,6 +8,7 @@ class TrainingConfig(BaseModel):
     algorithm: str = "PPO"
     total_timesteps: int = 10000
     hyperparameters: dict[str, Any] = {}
+    n_envs: int = 1
     experiment_name: str | None = None
 
 

@@ -7,6 +7,7 @@ import gymnasium as gym
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from stable_baselines3.common.evaluation import evaluate_policy
+from stable_baselines3.common.vec_env import DummyVecEnv
 
 from app.core.algorithms import get_algorithm_class, validate_algorithm_environment
 from app.models.experiment import Experiment
@@ -20,18 +21,28 @@ def _run_training(config: TrainingConfig) -> dict[str, Any]:
     if not compatible:
         raise ValueError(error)
 
-    env = gym.make(config.environment_id)
     algo_class = get_algorithm_class(config.algorithm)
+
+    if config.n_envs > 1:
+        env = DummyVecEnv([
+            lambda _eid=config.environment_id: gym.make(_eid)
+            for _ in range(config.n_envs)
+        ])
+    else:
+        env = gym.make(config.environment_id)
+
     model = algo_class("MlpPolicy", env, **config.hyperparameters)
 
     start_time = time.time()
     model.learn(total_timesteps=config.total_timesteps)
     elapsed_time = time.time() - start_time
 
-    raw_mean, raw_std = evaluate_policy(model, env, n_eval_episodes=10)
+    eval_env = gym.make(config.environment_id)
+    raw_mean, raw_std = evaluate_policy(model, eval_env, n_eval_episodes=10)
     mean_reward = float(raw_mean) if isinstance(raw_mean, float) else float(raw_mean[0])
     std_reward = float(raw_std) if isinstance(raw_std, (float, int)) else float(raw_std[0])
 
+    eval_env.close()
     env.close()
 
     return {
