@@ -1,9 +1,7 @@
 import asyncio
 import logging
-import time
 import uuid
 from collections.abc import Callable
-from datetime import UTC, datetime
 from typing import Any
 
 import gymnasium as gym
@@ -85,7 +83,7 @@ def create_objective(
             model = algo_class("MlpPolicy", env, **params)
             model.learn(total_timesteps=total_timesteps)
 
-            raw_mean, raw_std = evaluate_policy(
+            raw_mean, _raw_std = evaluate_policy(
                 model, env, n_eval_episodes=n_eval_episodes
             )
             mean_reward = (
