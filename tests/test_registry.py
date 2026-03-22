@@ -1,7 +1,7 @@
+import contextlib
+
 import pytest
 from httpx import AsyncClient
-
-from app.db.session import Base
 
 
 @pytest.fixture
@@ -57,10 +57,8 @@ async def model_version_id(client: AsyncClient, auth_headers: dict[str, str]) ->
     await db.commit()
     await db.refresh(mv)
     version_id = mv.id
-    try:
+    with contextlib.suppress(StopAsyncIteration):
         await db_gen.__anext__()
-    except StopAsyncIteration:
-        pass
     return version_id
 
 

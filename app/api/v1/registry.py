@@ -53,7 +53,7 @@ async def register(
             db, model_version_id, environment_id, algorithm, current_user.id
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from None
     return RegistryEntry.model_validate(entry)
 
 
@@ -101,7 +101,7 @@ async def promote(
     try:
         entry = await promote_model(db, registry_id, request, current_user.id)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from None
     return RegistryEntry.model_validate(entry)
 
 
@@ -147,4 +147,4 @@ async def compare(
             db, entry.model_version_id, entry.environment_id, entry.algorithm
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from None
