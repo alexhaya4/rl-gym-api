@@ -280,7 +280,7 @@ def _evaluate_default(
     env = gym.make(environment_id)
     try:
         algo_class = ALGORITHMS[algorithm]
-        model = algo_class("MlpPolicy", env)
+        model = algo_class("MlpPolicy", env, learning_rate=3e-4)
         model.learn(total_timesteps=total_timesteps)
         raw_mean, _ = evaluate_policy(model, env, n_eval_episodes=n_eval_episodes)
         return float(raw_mean) if isinstance(raw_mean, float) else float(raw_mean[0])
