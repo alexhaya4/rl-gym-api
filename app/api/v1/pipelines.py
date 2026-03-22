@@ -3,9 +3,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.session import get_db
 from app.dependencies import get_current_active_user
 from app.models.user import User
 from app.schemas.pipeline import PipelineRunRequest, PipelineRunResponse

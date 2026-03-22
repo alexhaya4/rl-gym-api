@@ -1,7 +1,5 @@
 import asyncio
 import logging
-import time
-from typing import Any
 
 from prefect import task
 from sqlalchemy import select
