@@ -12,12 +12,12 @@ from app.models.usage import UsageRecord
 from app.models.user import User
 
 __all__ = [
+    "AgentPolicy",
     "CustomEnvironment",
     "Episode",
     "Experiment",
     "Job",
     "ModelRegistry",
-    "AgentPolicy",
     "ModelVersion",
     "MultiAgentExperiment",
     "OptunaStudy",

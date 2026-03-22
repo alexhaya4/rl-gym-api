@@ -9,7 +9,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.algorithms import get_algorithm_class
-from app.db.session import AsyncSessionLocal
 from app.models.multi_agent import AgentPolicy, MultiAgentExperiment
 from app.schemas.multi_agent import MultiAgentTrainingRequest
 
