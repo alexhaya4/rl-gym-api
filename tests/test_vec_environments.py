@@ -1,3 +1,5 @@
+import contextlib
+
 import pytest
 from httpx import AsyncClient
 
@@ -23,10 +25,8 @@ async def auth_headers(client: AsyncClient) -> dict[str, str]:
 def _clear_vec_envs() -> None:
     yield
     for key in list(_vec_environments.keys()):
-        try:
+        with contextlib.suppress(Exception):
             _vec_environments[key].close()
-        except Exception:
-            pass
     _vec_environments.clear()
     _vec_configs.clear()
 
