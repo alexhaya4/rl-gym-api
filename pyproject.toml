@@ -46,6 +46,8 @@ dependencies = [
     "optuna>=3.6,<4",
     "optuna-integration[sqlalchemy]>=3.6,<4",
     "sb3-contrib>=2.4,<3",
+    "pettingzoo>=1.24,<2",
+    "supersuit>=3.9,<4",
 ]
 
 [project.optional-dependencies]

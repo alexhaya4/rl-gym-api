@@ -12,6 +12,7 @@ from app.api.v1.environments import router as environments_router
 from app.api.v1.evaluation import router as evaluation_router
 from app.api.v1.experiments import router as experiments_router
 from app.api.v1.models import router as models_router
+from app.api.v1.multi_agent import router as multi_agent_router
 from app.api.v1.optimization import router as optimization_router
 from app.api.v1.organizations import router as organizations_router
 from app.api.v1.pipelines import router as pipelines_router
@@ -32,6 +33,7 @@ router.include_router(environments_router)
 router.include_router(training_router)
 router.include_router(experiments_router)
 router.include_router(models_router)
+router.include_router(multi_agent_router)
 router.include_router(organizations_router)
 router.include_router(billing_router)
 router.include_router(ray_training_router)
