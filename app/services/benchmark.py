@@ -7,7 +7,6 @@ import gymnasium as gym
 from stable_baselines3.common.evaluation import evaluate_policy
 
 from app.core.algorithms import (
-    ALL_ALGORITHMS,
     get_algorithm_class,
     validate_algorithm_environment,
 )
