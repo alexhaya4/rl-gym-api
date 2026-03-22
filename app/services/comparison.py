@@ -99,7 +99,7 @@ async def compare_experiments(
     completed = [e for e in experiments if e.mean_reward is not None]
     best_id: int | None = None
     if completed:
-        best = max(completed, key=lambda e: e.mean_reward)  # type: ignore[arg-type]
+        best = max(completed, key=lambda e: e.mean_reward if e.mean_reward is not None else float('-inf'))
         best_id = best.id
 
     return ComparisonResponse(
