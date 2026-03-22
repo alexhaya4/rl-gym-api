@@ -18,7 +18,7 @@ router = APIRouter(prefix="/pipelines", tags=["pipelines"])
 
 
 async def _run_training_pipeline(
-    pipeline_id: str, request_dict: dict, user_id: int
+    pipeline_id: str, request_dict: dict[str, Any], user_id: int
 ) -> None:
     from app.pipelines.flows import rl_training_pipeline
 
@@ -27,7 +27,7 @@ async def _run_training_pipeline(
 
 
 async def _run_search_pipeline(
-    pipeline_id: str, request_dict: dict, user_id: int
+    pipeline_id: str, request_dict: dict[str, Any], user_id: int
 ) -> None:
     from app.pipelines.flows import hyperparameter_search_pipeline
 

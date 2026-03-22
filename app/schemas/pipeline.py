@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel
 
 
@@ -5,7 +7,7 @@ class PipelineRunRequest(BaseModel):
     environment_id: str
     algorithm: str = "PPO"
     total_timesteps: int = 10000
-    hyperparameters: dict = {}
+    hyperparameters: dict[str, Any] = {}
     experiment_name: str | None = None
     min_reward_threshold: float | None = None
     retrain_if_exists: bool = True
@@ -15,7 +17,7 @@ class PipelineRunRequest(BaseModel):
 class PipelineStepResult(BaseModel):
     step_name: str
     status: str
-    output: dict | None = None
+    output: dict[str, Any] | None = None
     error: str | None = None
     duration_seconds: float
 

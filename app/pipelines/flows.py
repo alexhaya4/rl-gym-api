@@ -51,8 +51,8 @@ async def _run_step(
 
 @flow(name="rl-training-pipeline", retries=1)
 async def rl_training_pipeline(
-    request: dict, user_id: int, pipeline_id: str
-) -> dict:
+    request: dict[str, Any], user_id: int, pipeline_id: str
+) -> dict[str, Any]:
     """Full RL training pipeline: create, train, evaluate, save, promote, notify."""
     started_at = datetime.now(UTC).isoformat()
     experiment_name = request.get("experiment_name") or (
@@ -168,8 +168,8 @@ async def rl_training_pipeline(
 
 @flow(name="hyperparameter-search-pipeline")
 async def hyperparameter_search_pipeline(
-    request: dict, user_id: int, pipeline_id: str
-) -> dict:
+    request: dict[str, Any], user_id: int, pipeline_id: str
+) -> dict[str, Any]:
     """Pipeline: distributed hyperparameter search, save best model, promote."""
     from app.schemas.ray_training import DistributedTrainingRequest
     from app.services.ray_training import run_distributed_training
@@ -292,7 +292,7 @@ async def hyperparameter_search_pipeline(
 @flow(name="scheduled-retraining-pipeline")
 async def scheduled_retraining_pipeline(
     environment_id: str, algorithm: str, user_id: int
-) -> dict:
+) -> dict[str, Any]:
     """Scheduled retraining: skip if recent experiment exists, else run full pipeline."""
     pipeline_id = str(uuid.uuid4())
     started_at = datetime.now(UTC).isoformat()
@@ -389,7 +389,7 @@ def _build_response(
     model_version_id: int | None = None,
     promoted: bool = False,
     message: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Build a PipelineRunResponse as a serialisable dict."""
     completed_at = datetime.now(UTC).isoformat() if status in ("completed", "failed") else None
     response = PipelineRunResponse(

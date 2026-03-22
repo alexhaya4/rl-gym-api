@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import Any
 
 from prefect import task
 from sqlalchemy import select
@@ -20,8 +21,8 @@ logger = logging.getLogger(__name__)
 
 @task(name="create-experiment", retries=3, retry_delay_seconds=5)
 async def create_experiment_task(
-    db: AsyncSession, config: dict, user_id: int
-) -> dict:
+    db: AsyncSession, config: dict[str, Any], user_id: int
+) -> dict[str, Any]:
     """Create an Experiment record using the experiment service."""
     experiment_create = ExperimentCreate(
         name=config.get("experiment_name") or f"{config['algorithm']}-{config['environment_id']}",
@@ -39,7 +40,7 @@ async def create_experiment_task(
 
 
 @task(name="train-model", retries=2, retry_delay_seconds=30)
-async def train_model_task(experiment_id: int, config: dict) -> dict:
+async def train_model_task(experiment_id: int, config: dict[str, Any]) -> dict[str, Any]:
     """Enqueue a training job via ARQ and poll until completion or timeout."""
     from arq.connections import create_pool
 
@@ -94,7 +95,7 @@ async def train_model_task(experiment_id: int, config: dict) -> dict:
 @task(name="evaluate-model", retries=2, retry_delay_seconds=10)
 async def evaluate_model_task(
     experiment_id: int, n_eval_episodes: int = 10
-) -> dict:
+) -> dict[str, Any]:
     """Run evaluation using the evaluation service."""
     db = AsyncSessionLocal()
     try:
@@ -113,7 +114,7 @@ async def evaluate_model_task(
 
 
 @task(name="save-model", retries=3, retry_delay_seconds=5)
-async def save_model_task(experiment_id: int, mean_reward: float) -> dict:
+async def save_model_task(experiment_id: int, mean_reward: float) -> dict[str, Any]:
     """Save the trained model using the model storage service."""
     db = AsyncSessionLocal()
     try:
@@ -154,7 +155,7 @@ async def save_model_task(experiment_id: int, mean_reward: float) -> dict:
 @task(name="promote-model", retries=2, retry_delay_seconds=5)
 async def promote_model_task(
     model_version_id: int, threshold: float | None
-) -> dict:
+) -> dict[str, Any]:
     """Promote a model version if it exceeds the reward threshold."""
     db = AsyncSessionLocal()
     try:
@@ -195,7 +196,7 @@ async def promote_model_task(
 
 @task(name="notify-completion")
 async def notify_completion_task(
-    pipeline_id: str, status: str, results: dict
+    pipeline_id: str, status: str, results: dict[str, Any]
 ) -> None:
     """Log pipeline completion. Extend to send email/Slack notifications."""
     logger.info(
