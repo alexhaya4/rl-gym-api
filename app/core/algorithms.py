@@ -118,7 +118,7 @@ def validate_algorithm_environment(algorithm: str, environment_id: str) -> tuple
     return True, ""
 
 
-def get_algorithm_class(algorithm: str) -> type:
+def get_algorithm_class(algorithm: str) -> Any:
     """Return the SB3 or sb3-contrib algorithm class."""
     if algorithm not in ALL_ALGORITHMS:
         raise ValueError(f"Unsupported algorithm: {algorithm}")
