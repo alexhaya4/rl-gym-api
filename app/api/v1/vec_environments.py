@@ -1,4 +1,5 @@
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -47,10 +48,10 @@ async def create_vec_env(
     )
 
 
-@router.get("/", response_model=list[dict])
+@router.get("/", response_model=list[dict[str, Any]])
 async def list_vec_envs(
     _current_user: User = Depends(get_current_active_user),
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """List all active vectorized environments."""
     return list_vec_environments()
 

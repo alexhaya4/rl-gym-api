@@ -24,10 +24,10 @@ def _run_training(config: TrainingConfig) -> dict[str, Any]:
     algo_class = get_algorithm_class(config.algorithm)
 
     if config.n_envs > 1:
-        env = DummyVecEnv([
-            lambda _eid=config.environment_id: gym.make(_eid)
-            for _ in range(config.n_envs)
-        ])
+        def _make_env() -> gym.Env[Any, Any]:
+            return gym.make(config.environment_id)
+
+        env: Any = DummyVecEnv([_make_env for _ in range(config.n_envs)])
     else:
         env = gym.make(config.environment_id)
 

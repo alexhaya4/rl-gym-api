@@ -41,10 +41,10 @@ def _run_training_sync(
     algo_class = get_algorithm_class(config["algorithm"])
 
     if n_envs > 1:
-        env = DummyVecEnv([
-            lambda _eid=config["environment_id"]: gym.make(_eid)
-            for _ in range(n_envs)
-        ])
+        def _make_env() -> gym.Env[Any, Any]:
+            return gym.make(config["environment_id"])
+
+        env: Any = DummyVecEnv([_make_env for _ in range(n_envs)])
     else:
         env = gym.make(config["environment_id"])
 

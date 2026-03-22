@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Any
 
 import gymnasium as gym
@@ -16,7 +17,7 @@ _vec_environments: dict[str, Any] = {}
 _vec_configs: dict[str, dict[str, Any]] = {}
 
 
-def _make_env(environment_id: str, seed: int | None = None) -> callable:
+def _make_env(environment_id: str, seed: int | None = None) -> Callable[[], gym.Env[Any, Any]]:
     """Return a factory function that creates a gymnasium environment."""
     def _init() -> gym.Env[Any, Any]:
         env = gym.make(environment_id)
