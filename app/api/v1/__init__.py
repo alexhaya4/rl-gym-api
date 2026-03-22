@@ -4,9 +4,11 @@ from typing import Any
 from fastapi import APIRouter
 
 from app.api.v1.algorithms import router as algorithms_router
+from app.api.v1.artifacts import router as artifacts_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.benchmarks import router as benchmarks_router
 from app.api.v1.billing import router as billing_router
+from app.api.v1.comparison import router as comparison_router
 from app.api.v1.custom_environments import router as custom_environments_router
 from app.api.v1.environments import router as environments_router
 from app.api.v1.evaluation import router as evaluation_router
@@ -28,7 +30,9 @@ _start_time = time.time()
 
 router = APIRouter()
 router.include_router(algorithms_router)
+router.include_router(artifacts_router)
 router.include_router(auth_router)
+router.include_router(comparison_router)
 router.include_router(custom_environments_router)
 router.include_router(environments_router)
 router.include_router(training_router)

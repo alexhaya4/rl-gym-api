@@ -27,6 +27,10 @@ class Experiment(Base):  # type: ignore[misc]
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     mean_reward: Mapped[float | None] = mapped_column(Float, nullable=True)
     std_reward: Mapped[float | None] = mapped_column(Float, nullable=True)
+    tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    parent_experiment_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("experiments.id"), nullable=True
+    )
 
     def __repr__(self) -> str:
         return f"<Experiment(id={self.id}, name={self.name!r}, status={self.status!r})>"

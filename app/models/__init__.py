@@ -1,3 +1,4 @@
+from app.models.artifact import Artifact, ArtifactLineage
 from app.models.custom_environment import CustomEnvironment
 from app.models.episode import Episode
 from app.models.experiment import Experiment
@@ -13,6 +14,8 @@ from app.models.user import User
 
 __all__ = [
     "AgentPolicy",
+    "Artifact",
+    "ArtifactLineage",
     "CustomEnvironment",
     "Episode",
     "Experiment",
