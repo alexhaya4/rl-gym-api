@@ -12,6 +12,7 @@ from app.api.v1.evaluation import router as evaluation_router
 from app.api.v1.experiments import router as experiments_router
 from app.api.v1.models import router as models_router
 from app.api.v1.organizations import router as organizations_router
+from app.api.v1.pipelines import router as pipelines_router
 from app.api.v1.ray_training import router as ray_training_router
 from app.api.v1.training import router as training_router
 from app.api.v1.websockets import router as ws_router
@@ -32,6 +33,7 @@ router.include_router(billing_router)
 router.include_router(ray_training_router)
 router.include_router(benchmarks_router)
 router.include_router(evaluation_router)
+router.include_router(pipelines_router)
 router.include_router(ws_router)
 
 
