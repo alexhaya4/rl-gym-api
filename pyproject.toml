@@ -50,6 +50,7 @@ dependencies = [
     "supersuit>=3.9,<4",
     "h5py>=3.10,<4",
     "scipy>=1.12,<2",
+    "cloudpickle>=3.0,<4",
 ]
 
 [project.optional-dependencies]

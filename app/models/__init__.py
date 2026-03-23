@@ -9,6 +9,7 @@ from app.models.model_version import ModelVersion
 from app.models.multi_agent import AgentPolicy, MultiAgentExperiment
 from app.models.optuna_study import OptunaStudy
 from app.models.organization import Organization, OrganizationMember
+from app.models.pbt import PBTExperiment, PBTMember
 from app.models.registry import ModelRegistry
 from app.models.subscription import Subscription
 from app.models.usage import UsageRecord
@@ -32,6 +33,8 @@ __all__ = [
     "OptunaStudy",
     "Organization",
     "OrganizationMember",
+    "PBTExperiment",
+    "PBTMember",
     "Subscription",
     "UsageRecord",
     "User",

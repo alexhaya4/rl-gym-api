@@ -19,6 +19,7 @@ from app.api.v1.models import router as models_router
 from app.api.v1.multi_agent import router as multi_agent_router
 from app.api.v1.optimization import router as optimization_router
 from app.api.v1.organizations import router as organizations_router
+from app.api.v1.pbt import router as pbt_router
 from app.api.v1.pipelines import router as pipelines_router
 from app.api.v1.ray_training import router as ray_training_router
 from app.api.v1.registry import router as registry_router
@@ -49,6 +50,7 @@ router.include_router(ray_training_router)
 router.include_router(benchmarks_router)
 router.include_router(evaluation_router)
 router.include_router(optimization_router)
+router.include_router(pbt_router)
 router.include_router(pipelines_router)
 router.include_router(registry_router)
 router.include_router(vec_environments_router)
