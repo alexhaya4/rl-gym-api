@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import create_access_token
+from app.core.token_blacklist import blacklist_token, get_token_expiry
 from app.db.session import get_db
 from app.dependencies import get_current_active_user
 from app.models.user import User
@@ -39,6 +40,18 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
         )
     access_token = create_access_token(data={"sub": user.username})
     return Token(access_token=access_token)
+
+
+@router.post("/logout")
+async def logout(
+    request: Request,
+    current_user: User = Depends(get_current_active_user),
+) -> dict[str, str]:
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.removeprefix("Bearer ")
+    expires_in = await get_token_expiry(token)
+    await blacklist_token(token, expires_in)
+    return {"message": "Successfully logged out"}
 
 
 @router.get("/me", response_model=UserResponse)

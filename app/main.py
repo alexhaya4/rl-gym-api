@@ -26,11 +26,40 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger = logging.getLogger(__name__)
     settings = get_settings()
     logger.info(f"RL Gym API starting up (environment={settings.ENVIRONMENT})")
+
+    _validate_secret_key(settings, logger)
+
     # Initialize custom Prometheus metrics (register collectors on import)
     import app.core.prometheus as _  # noqa: F401
     await start_grpc_server(port=settings.GRPC_PORT)
     yield
     await stop_grpc_server()
+
+
+def _validate_secret_key(settings: Any, logger: logging.Logger) -> None:
+    default_key = "change-me-to-a-random-secret-key"
+    key = settings.SECRET_KEY
+    is_default = key == default_key
+    is_short = len(key) < 32
+    is_weak = is_default or is_short
+
+    if is_short:
+        logger.warning(
+            "SECRET_KEY is too short. Generate a secure key with: "
+            "python -c 'import secrets; print(secrets.token_hex(32))'"
+        )
+
+    if is_default:
+        logger.critical(
+            "SECRET_KEY is using the default value. "
+            "This is a security risk in production."
+        )
+
+    if settings.ENVIRONMENT == "production" and is_weak:
+        raise RuntimeError(
+            "Refusing to start in production with a weak SECRET_KEY. "
+            "Set a strong SECRET_KEY (>= 32 characters) in your environment."
+        )
 
 
 def create_app() -> FastAPI:
