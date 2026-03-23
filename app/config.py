@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379"
+    REDIS_PASSWORD: str | None = None
 
     # Model Storage
     STORAGE_BACKEND: str = "local"
@@ -50,6 +51,13 @@ class Settings(BaseSettings):
 
     # Ray
     RAY_ADDRESS: str | None = None
+
+    # Metrics
+    METRICS_TOKEN: str | None = None
+    METRICS_ALLOWED_IPS: str = "127.0.0.1,::1"
+
+    # Request Size Limits
+    MAX_REQUEST_SIZE_MB: int = 10
 
     # CORS
     ALLOWED_ORIGINS: str = "http://localhost:3000"

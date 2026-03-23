@@ -14,6 +14,18 @@ DEFAULT_EXPIRY_SECONDS = 3600
 _memory_blacklist: dict[str, float] = {}
 
 
+def _redis_client() -> redis.Redis:
+    """Create a Redis client, applying REDIS_PASSWORD if configured."""
+    settings = get_settings()
+    kwargs: dict[str, str] = {}
+    if settings.REDIS_PASSWORD:
+        kwargs["password"] = settings.REDIS_PASSWORD
+    client: redis.Redis = redis.from_url(  # type: ignore[no-untyped-call]
+        settings.REDIS_URL, **kwargs
+    )
+    return client
+
+
 def _purge_expired() -> None:
     """Remove expired entries from the in-memory blacklist."""
     now = time.time()
@@ -27,9 +39,8 @@ async def blacklist_token(token: str, expires_in_seconds: int) -> None:
 
     Falls back to in-memory storage when Redis is unavailable.
     """
-    settings = get_settings()
     try:
-        client: redis.Redis = redis.from_url(settings.REDIS_URL)  # type: ignore[no-untyped-call]
+        client = _redis_client()
         try:
             await client.setex(f"blacklist:{token}", expires_in_seconds, "1")
         finally:
@@ -42,9 +53,8 @@ async def blacklist_token(token: str, expires_in_seconds: int) -> None:
 
 async def is_token_blacklisted(token: str) -> bool:
     """Check if a token is blacklisted. Falls back to in-memory store if Redis is unavailable."""
-    settings = get_settings()
     try:
-        client: redis.Redis = redis.from_url(settings.REDIS_URL)  # type: ignore[no-untyped-call]
+        client = _redis_client()
         try:
             result: int = await client.exists(f"blacklist:{token}")
             return result > 0

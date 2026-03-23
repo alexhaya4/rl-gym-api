@@ -4,9 +4,12 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import Depends, FastAPI, Request, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette_prometheus import PrometheusMiddleware
 from starlette_prometheus.view import metrics as handle_metrics
 
@@ -62,6 +65,53 @@ def _validate_secret_key(settings: Any, logger: logging.Logger) -> None:
         )
 
 
+class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
+    """Reject requests whose body exceeds the configured size limit."""
+
+    def __init__(self, app: Any, max_bytes: int) -> None:
+        super().__init__(app)
+        self.max_bytes = max_bytes
+
+    async def dispatch(self, request: Request, call_next: Any) -> Response:
+        content_length = request.headers.get("content-length")
+        if content_length is not None:
+            if int(content_length) > self.max_bytes:
+                return JSONResponse(
+                    status_code=413,
+                    content={"detail": "Request body too large. Maximum size is 10MB."},
+                )
+        else:
+            body = b""
+            async for chunk in request.stream():
+                body += chunk
+                if len(body) > self.max_bytes:
+                    return JSONResponse(
+                        status_code=413,
+                        content={"detail": "Request body too large. Maximum size is 10MB."},
+                    )
+            # Re-inject the consumed body so downstream handlers can read it
+            async def receive() -> dict[str, Any]:
+                return {"type": "http.request", "body": body}
+
+            request._receive = receive
+
+        response: Response = await call_next(request)
+        return response
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Add security headers to every response."""
+
+    async def dispatch(self, request: Request, call_next: Any) -> Response:
+        response: Response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        return response
+
+
 def create_app() -> FastAPI:
     configure_logging()
     settings = get_settings()
@@ -101,6 +151,40 @@ def create_app() -> FastAPI:
         ],
     )
 
+    logger = logging.getLogger(__name__)
+
+    async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+        if settings.ENVIRONMENT == "production":
+            logger.exception("Unhandled exception")
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Internal server error"},
+            )
+        return JSONResponse(
+            status_code=500,
+            content={"detail": str(exc)},
+        )
+
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=422,
+            content={
+                "detail": [
+                    {
+                        "loc": list(err.get("loc", [])),
+                        "msg": err.get("msg", ""),
+                        "type": err.get("type", ""),
+                    }
+                    for err in exc.errors()
+                ]
+            },
+        )
+
+    app.add_exception_handler(Exception, generic_exception_handler)
+    app.add_exception_handler(RequestValidationError, validation_exception_handler)  # type: ignore[arg-type]
+
     app.state.limiter = limiter
     app.add_exception_handler(
         RateLimitExceeded,
@@ -116,6 +200,9 @@ def create_app() -> FastAPI:
     )
     app.add_middleware(PrometheusMiddleware)
     app.add_middleware(RequestIDMiddleware)
+    max_bytes = settings.MAX_REQUEST_SIZE_MB * 1024 * 1024
+    app.add_middleware(RequestSizeLimitMiddleware, max_bytes=max_bytes)
+    app.add_middleware(SecurityHeadersMiddleware)
 
     app.include_router(v1_router, prefix="/api/v1")
     app.include_router(ws_router, prefix="/api/v1")
@@ -128,6 +215,16 @@ def create_app() -> FastAPI:
 
     @app.get("/metrics")
     async def metrics(request: Request) -> Response:
+        if settings.METRICS_TOKEN is not None:
+            client_ip = request.client.host if request.client else None
+            allowed_ips = {ip.strip() for ip in settings.METRICS_ALLOWED_IPS.split(",")}
+            token_ok = request.headers.get("X-Metrics-Token") == settings.METRICS_TOKEN
+            ip_ok = client_ip in allowed_ips
+            if not token_ok and not ip_ok:
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": "Metrics endpoint requires authentication"},
+                )
         return handle_metrics(request)
 
     return app

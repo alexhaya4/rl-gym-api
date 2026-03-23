@@ -29,6 +29,11 @@ async def register_custom_environment(
     db: AsyncSession = Depends(get_db),
 ) -> CustomEnvironmentResponse:
     """Register a custom Gymnasium-compatible environment by uploading Python source code."""
+    if len(env_in.source_code) > 100_000:
+        raise HTTPException(
+            status_code=413,
+            detail="Source code too large. Maximum length is 100,000 characters.",
+        )
     custom_env = await create_custom_environment(db, env_in, current_user.id)
     return CustomEnvironmentResponse.model_validate(custom_env)
 
