@@ -1,4 +1,3 @@
-from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.responses import Response
@@ -8,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.dependencies import get_current_active_user
-from app.models.dataset import Dataset, DatasetEpisode
+from app.models.dataset import DatasetEpisode
 from app.models.user import User
 from app.schemas.dataset import (
     DatasetCreate,
