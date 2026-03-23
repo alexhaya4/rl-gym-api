@@ -49,6 +49,7 @@ dependencies = [
     "pettingzoo>=1.24,<2",
     "supersuit>=3.9,<4",
     "h5py>=3.10,<4",
+    "scipy>=1.12,<2",
 ]
 
 [project.optional-dependencies]

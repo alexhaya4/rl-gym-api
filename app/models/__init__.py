@@ -1,3 +1,4 @@
+from app.models.ab_test import ABTest, ABTestResult
 from app.models.artifact import Artifact, ArtifactLineage
 from app.models.custom_environment import CustomEnvironment
 from app.models.dataset import Dataset, DatasetEpisode
@@ -14,6 +15,8 @@ from app.models.usage import UsageRecord
 from app.models.user import User
 
 __all__ = [
+    "ABTest",
+    "ABTestResult",
     "AgentPolicy",
     "Artifact",
     "ArtifactLineage",

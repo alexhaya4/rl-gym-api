@@ -3,6 +3,7 @@ from typing import Any
 
 from fastapi import APIRouter
 
+from app.api.v1.ab_testing import router as ab_testing_router
 from app.api.v1.algorithms import router as algorithms_router
 from app.api.v1.artifacts import router as artifacts_router
 from app.api.v1.auth import router as auth_router
@@ -30,6 +31,7 @@ from app.services.environment import _environments
 _start_time = time.time()
 
 router = APIRouter()
+router.include_router(ab_testing_router)
 router.include_router(algorithms_router)
 router.include_router(artifacts_router)
 router.include_router(auth_router)
