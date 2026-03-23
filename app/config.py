@@ -13,6 +13,10 @@ class Settings(BaseSettings):
 
     # Database
     DATABASE_URL: str = "sqlite+aiosqlite:///./rl_gym.db"
+    DB_POOL_SIZE: int = 10
+    DB_MAX_OVERFLOW: int = 20
+    DB_POOL_TIMEOUT: int = 30
+    DB_COMMAND_TIMEOUT: int = 30
 
     # Application
     ENVIRONMENT: str = "development"
@@ -33,6 +37,7 @@ class Settings(BaseSettings):
 
     # gRPC
     GRPC_PORT: int = 50051
+    GRPC_API_KEY: str | None = None
 
     # Stripe
     STRIPE_SECRET_KEY: str | None = None
@@ -55,6 +60,9 @@ class Settings(BaseSettings):
     # Metrics
     METRICS_TOKEN: str | None = None
     METRICS_ALLOWED_IPS: str = "127.0.0.1,::1"
+
+    # Security Headers
+    HSTS_MAX_AGE: int = 31536000
 
     # Request Size Limits
     MAX_REQUEST_SIZE_MB: int = 10
