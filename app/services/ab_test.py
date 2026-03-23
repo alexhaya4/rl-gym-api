@@ -54,13 +54,13 @@ def _run_ab_evaluation(
     lengths_a: list[int] = []
     lengths_b: list[int] = []
 
-    for variant, rewards_list, lengths_list in [
+    for _variant, rewards_list, lengths_list in [
         ("a", rewards_a, lengths_a),
         ("b", rewards_b, lengths_b),
     ]:
         env = gym.make(environment_id)
         for _ in range(n_episodes):
-            obs, _info = env.reset()
+            _obs, _info = env.reset()
             episode_reward = 0.0
             episode_length = 0
             terminated = False
@@ -68,7 +68,7 @@ def _run_ab_evaluation(
 
             while not (terminated or truncated):
                 action = env.action_space.sample()
-                obs, reward, terminated, truncated, _info = env.step(action)
+                _obs, reward, terminated, truncated, _info = env.step(action)
                 episode_reward += float(reward)
                 episode_length += 1
 

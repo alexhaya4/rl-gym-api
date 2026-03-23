@@ -207,10 +207,11 @@ async def test_run_already_running_test(
     # The mock doesn't actually change status, but the endpoint checks draft status.
     # After first run call, the test is still "draft" because bg task is mocked.
     # To test properly, we need to manually change status.
+    from sqlalchemy import select
+
     from app.db.session import get_db
     from app.main import app
     from app.models.ab_test import ABTest
-    from sqlalchemy import select
 
     db_gen = app.dependency_overrides[get_db]()
     db = await db_gen.__anext__()
