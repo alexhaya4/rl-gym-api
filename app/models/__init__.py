@@ -1,5 +1,6 @@
 from app.models.artifact import Artifact, ArtifactLineage
 from app.models.custom_environment import CustomEnvironment
+from app.models.dataset import Dataset, DatasetEpisode
 from app.models.episode import Episode
 from app.models.experiment import Experiment
 from app.models.job import Job
@@ -17,6 +18,8 @@ __all__ = [
     "Artifact",
     "ArtifactLineage",
     "CustomEnvironment",
+    "Dataset",
+    "DatasetEpisode",
     "Episode",
     "Experiment",
     "Job",
