@@ -97,7 +97,7 @@ async def run_in_sandbox(source_code: str, env_name: str) -> dict[str, Any]:
             "--memory", settings.SANDBOX_MEMORY_LIMIT,
             "--cpus", str(settings.SANDBOX_CPU_LIMIT),
             "--read-only",
-            "--tmpfs", "/tmp:size=10m",
+            "--tmpfs", "/tmp:size=10m",  # nosec B108 - intentional Docker tmpfs mount, not a temp file vulnerability
             "-i",
             SANDBOX_IMAGE,
             "python", "/sandbox/runner.py", env_name,
