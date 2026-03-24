@@ -96,7 +96,7 @@ async def revalidate_custom_environment(
             detail="Custom environment not found",
         )
 
-    is_valid, error_message = validate_environment_code(
+    is_valid, error_message = await validate_environment_code(
         custom_env.source_code, custom_env.name
     )
     custom_env.is_validated = is_valid

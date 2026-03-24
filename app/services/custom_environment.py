@@ -7,6 +7,7 @@ import gymnasium as gym
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.sandbox import run_in_sandbox
 from app.models.custom_environment import CustomEnvironment
 from app.schemas.custom_environment import CustomEnvironmentCreate
 
@@ -23,19 +24,14 @@ DANGEROUS_PATTERNS = [
 ]
 
 
-def validate_environment_code(source_code: str, name: str) -> tuple[bool, str | None]:
+async def validate_environment_code(source_code: str, name: str) -> tuple[bool, str | None]:
     """Validate that source code is safe and contains a valid environment class."""
     try:
         tree = ast.parse(source_code)
     except SyntaxError as e:
         return False, f"Syntax error: {e}"
 
-    # Check for at least one class definition
-    class_defs = [node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
-    if not class_defs:
-        return False, "Source code must contain at least one class definition"
-
-    # Check for dangerous patterns
+    # Check for dangerous patterns as a fast pre-filter
     for pattern in DANGEROUS_PATTERNS:
         match = re.search(pattern, source_code)
         if match:
@@ -50,7 +46,11 @@ def validate_environment_code(source_code: str, name: str) -> tuple[bool, str | 
         elif isinstance(node, ast.ImportFrom) and node.module and node.module.split(".")[0] in ("subprocess", "shutil"):
             return False, f"Forbidden import from: {node.module}"
 
-    return True, None
+    # Run in sandbox for full validation
+    result = await run_in_sandbox(source_code, name)
+    if result["valid"]:
+        return True, None
+    return False, result["error"]
 
 
 def register_custom_environment(source_code: str, name: str) -> str:
@@ -89,7 +89,7 @@ async def create_custom_environment(
     db: AsyncSession, env_create: CustomEnvironmentCreate, user_id: int
 ) -> CustomEnvironment:
     """Validate, register, and persist a custom environment."""
-    is_valid, error_message = validate_environment_code(
+    is_valid, error_message = await validate_environment_code(
         env_create.source_code, env_create.name
     )
 

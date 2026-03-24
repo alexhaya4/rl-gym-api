@@ -68,6 +68,12 @@ class Settings(BaseSettings):
     # Request Size Limits
     MAX_REQUEST_SIZE_MB: int = 10
 
+    # Sandbox
+    SANDBOX_ENABLED: bool = True
+    SANDBOX_TIMEOUT_SECONDS: int = 30
+    SANDBOX_MEMORY_LIMIT: str = "128m"
+    SANDBOX_CPU_LIMIT: float = 0.5
+
     # CORS
     ALLOWED_ORIGINS: str = "http://localhost:3000"
 

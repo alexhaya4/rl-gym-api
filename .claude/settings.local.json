@@ -46,7 +46,8 @@
       "Bash(python -m pytest tests/ -v --tb=short)",
       "Bash(python:*)",
       "Bash(bandit:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(echo \"EXIT: $?\")"
     ]
   }
 }
