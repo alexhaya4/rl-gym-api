@@ -193,12 +193,12 @@ def create_app() -> FastAPI:
         )
 
     app.add_exception_handler(Exception, generic_exception_handler)
-    app.add_exception_handler(RequestValidationError, validation_exception_handler)
+    app.add_exception_handler(RequestValidationError, validation_exception_handler)  # type: ignore[arg-type]
 
     app.state.limiter = limiter
     app.add_exception_handler(
         RateLimitExceeded,
-        rate_limit_exceeded_handler,
+        rate_limit_exceeded_handler,  # type: ignore[arg-type]
     )
 
     app.add_middleware(

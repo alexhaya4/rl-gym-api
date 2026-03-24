@@ -1,5 +1,6 @@
 import logging
 import time
+from typing import Any
 
 import redis.asyncio as redis
 from jose import jwt
@@ -14,14 +15,13 @@ DEFAULT_EXPIRY_SECONDS = 3600
 _memory_blacklist: dict[str, float] = {}
 
 
-def _redis_client() -> redis.Redis:  # type: ignore[name-defined]
+def _redis_client() -> Any:
     """Create a Redis client, applying REDIS_PASSWORD if configured."""
     settings = get_settings()
     kwargs: dict[str, str] = {}
     if settings.REDIS_PASSWORD:
         kwargs["password"] = settings.REDIS_PASSWORD
-    client = redis.from_url(settings.REDIS_URL, **kwargs)  # type: ignore[attr-defined]
-    return client
+    return redis.from_url(settings.REDIS_URL, **kwargs)  # type: ignore[attr-defined]
 
 
 def _purge_expired() -> None:

@@ -45,7 +45,8 @@
       "Bash(python -c \"import ast; ast.parse\\(open\\(''app/services/ab_test.py''\\).read\\(\\)\\); print\\(''OK''\\)\")",
       "Bash(python -m pytest tests/ -v --tb=short)",
       "Bash(python:*)",
-      "Bash(bandit:*)"
+      "Bash(bandit:*)",
+      "Bash(git config:*)"
     ]
   }
 }
