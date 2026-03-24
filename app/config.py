@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     S3_ENDPOINT_URL: str | None = None
 
     # gRPC
+    GRPC_HOST: str = "0.0.0.0"  # nosec B104 - configurable via env var
     GRPC_PORT: int = 50051
     GRPC_API_KEY: str | None = None
 

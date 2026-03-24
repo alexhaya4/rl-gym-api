@@ -21,7 +21,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class Dataset(Base):  # type: ignore[misc]
+class Dataset(Base):
     __tablename__ = "datasets"
     __table_args__ = (
         UniqueConstraint("name", "version", name="uq_dataset_name_version"),
@@ -60,7 +60,7 @@ class Dataset(Base):  # type: ignore[misc]
         return f"<Dataset(id={self.id}, name={self.name!r}, version={self.version})>"
 
 
-class DatasetEpisode(Base):  # type: ignore[misc]
+class DatasetEpisode(Base):
     __tablename__ = "dataset_episodes"
     __table_args__ = (
         Index("ix_dataset_episodes_dataset_id", "dataset_id"),

@@ -11,7 +11,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class OptunaStudy(Base):  # type: ignore[misc]
+class OptunaStudy(Base):
     __tablename__ = "optuna_studies"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

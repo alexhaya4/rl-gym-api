@@ -10,7 +10,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class Organization(Base):  # type: ignore[misc]
+class Organization(Base):
     __tablename__ = "organizations"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -26,7 +26,7 @@ class Organization(Base):  # type: ignore[misc]
         return f"<Organization(id={self.id}, name={self.name!r}, plan={self.plan!r})>"
 
 
-class OrganizationMember(Base):  # type: ignore[misc]
+class OrganizationMember(Base):
     __tablename__ = "organization_members"
     __table_args__ = (
         UniqueConstraint("organization_id", "user_id"),

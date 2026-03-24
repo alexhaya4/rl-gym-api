@@ -11,7 +11,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class Job(Base):  # type: ignore[misc]
+class Job(Base):
     __tablename__ = "jobs"
 
     id: Mapped[str] = mapped_column(String(100), primary_key=True)

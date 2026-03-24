@@ -19,7 +19,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class ModelVersion(Base):  # type: ignore[misc]
+class ModelVersion(Base):
     __tablename__ = "model_versions"
     __table_args__ = (
         UniqueConstraint("experiment_id", "version", name="uq_experiment_version"),

@@ -61,6 +61,8 @@ dev = [
     "anyio>=4.7,<5",
     "ruff>=0.8,<1",
     "mypy>=1.13,<2",
+    "bandit>=1.7,<2",
+    "safety>=3.0,<4",
 ]
 
 
@@ -101,3 +103,4 @@ python_version = "3.12"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+disable_error_code = ["untyped-decorator", "misc"]

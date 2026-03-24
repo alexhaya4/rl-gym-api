@@ -11,7 +11,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class Artifact(Base):  # type: ignore[misc]
+class Artifact(Base):
     __tablename__ = "artifacts"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -38,7 +38,7 @@ class Artifact(Base):  # type: ignore[misc]
         return f"<Artifact(id={self.id}, name={self.name!r}, type={self.artifact_type!r})>"
 
 
-class ArtifactLineage(Base):  # type: ignore[misc]
+class ArtifactLineage(Base):
     __tablename__ = "artifact_lineage"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

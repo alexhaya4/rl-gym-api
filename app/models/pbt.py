@@ -20,7 +20,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class PBTExperiment(Base):  # type: ignore[misc]
+class PBTExperiment(Base):
     __tablename__ = "pbt_experiments"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -56,7 +56,7 @@ class PBTExperiment(Base):  # type: ignore[misc]
         return f"<PBTExperiment(id={self.id}, name={self.name!r}, status={self.status!r})>"
 
 
-class PBTMember(Base):  # type: ignore[misc]
+class PBTMember(Base):
     __tablename__ = "pbt_members"
     __table_args__ = (
         UniqueConstraint(

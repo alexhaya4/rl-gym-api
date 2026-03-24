@@ -11,7 +11,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class CustomEnvironment(Base):  # type: ignore[misc]
+class CustomEnvironment(Base):
     __tablename__ = "custom_environments"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

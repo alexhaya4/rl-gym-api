@@ -72,7 +72,7 @@ async def create_stripe_customer(email: str, org_name: str) -> str:
         name=org_name,
         metadata={"source": "rl-gym-api"},
     )
-    return customer.id
+    return str(customer.id)
 
 
 async def create_checkout_session(
@@ -119,7 +119,7 @@ async def handle_webhook_event(
         return {"status": "skipped", "reason": "Stripe not configured"}
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
-    event = stripe.Webhook.construct_event(  # type: ignore[no-untyped-call]
+    event = stripe.Webhook.construct_event(
         payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
     )
 

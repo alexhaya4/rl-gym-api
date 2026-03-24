@@ -19,7 +19,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class MultiAgentExperiment(Base):  # type: ignore[misc]
+class MultiAgentExperiment(Base):
     __tablename__ = "multi_agent_experiments"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -51,7 +51,7 @@ class MultiAgentExperiment(Base):  # type: ignore[misc]
         return f"<MultiAgentExperiment(id={self.id}, name={self.name!r}, status={self.status!r})>"
 
 
-class AgentPolicy(Base):  # type: ignore[misc]
+class AgentPolicy(Base):
     __tablename__ = "agent_policies"
     __table_args__ = (
         UniqueConstraint("experiment_id", "agent_id", name="uq_experiment_agent"),

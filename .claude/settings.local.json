@@ -44,7 +44,8 @@
       "Bash(python -c \"import ast; ast.parse\\(open\\(''app/api/v1/comparison.py''\\).read\\(\\)\\); ast.parse\\(open\\(''app/api/v1/artifacts.py''\\).read\\(\\)\\); ast.parse\\(open\\(''app/api/v1/__init__.py''\\).read\\(\\)\\); print\\(''OK''\\)\")",
       "Bash(python -c \"import ast; ast.parse\\(open\\(''app/services/ab_test.py''\\).read\\(\\)\\); print\\(''OK''\\)\")",
       "Bash(python -m pytest tests/ -v --tb=short)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(bandit:*)"
     ]
   }
 }

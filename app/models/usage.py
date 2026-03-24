@@ -10,7 +10,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class UsageRecord(Base):  # type: ignore[misc]
+class UsageRecord(Base):
     __tablename__ = "usage_records"
     __table_args__ = (
         UniqueConstraint("organization_id", "month"),

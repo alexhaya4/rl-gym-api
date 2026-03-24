@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 _PUBLIC_METHODS = frozenset({"/InferenceService/GetModelInfo"})
 
 
-class APIKeyInterceptor(grpc.aio.ServerInterceptor):  # type: ignore[misc]
+class APIKeyInterceptor(grpc.aio.ServerInterceptor):
     """Validate x-api-key metadata on incoming gRPC requests.
 
     If GRPC_API_KEY is not configured (None), all requests are allowed

@@ -10,7 +10,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class ABTest(Base):  # type: ignore[misc]
+class ABTest(Base):
     __tablename__ = "ab_tests"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -51,7 +51,7 @@ class ABTest(Base):  # type: ignore[misc]
         return f"<ABTest(id={self.id}, name={self.name!r}, status={self.status!r})>"
 
 
-class ABTestResult(Base):  # type: ignore[misc]
+class ABTestResult(Base):
     __tablename__ = "ab_test_results"
     __table_args__ = (
         Index("ix_ab_test_results_ab_test_id", "ab_test_id"),

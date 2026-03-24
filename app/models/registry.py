@@ -10,7 +10,7 @@ def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class ModelRegistry(Base):  # type: ignore[misc]
+class ModelRegistry(Base):
     __tablename__ = "model_registry"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

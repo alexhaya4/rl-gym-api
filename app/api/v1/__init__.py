@@ -74,7 +74,7 @@ async def grpc_status() -> dict[str, Any]:
     """Return gRPC inference server status."""
     settings = get_settings()
     return {
-        "grpc_host": "0.0.0.0",
+        "grpc_host": settings.GRPC_HOST,
         "grpc_port": settings.GRPC_PORT,
         "status": "running",
     }

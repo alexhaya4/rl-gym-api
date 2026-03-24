@@ -28,7 +28,7 @@ def _cache_key(experiment_id: int, version: int) -> str:
     return f"{experiment_id}:{version}"
 
 
-class InferenceServicer(inference_pb2_grpc.InferenceServiceServicer):  # type: ignore[misc]
+class InferenceServicer(inference_pb2_grpc.InferenceServiceServicer):
     """gRPC servicer implementing the InferenceService."""
 
     async def Predict(  # noqa: N802
