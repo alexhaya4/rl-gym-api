@@ -21,7 +21,7 @@ def _redis_client() -> Any:
     kwargs: dict[str, str] = {}
     if settings.REDIS_PASSWORD:
         kwargs["password"] = settings.REDIS_PASSWORD
-    return redis.from_url(settings.REDIS_URL, **kwargs)  # type: ignore[attr-defined]
+    return redis.from_url(settings.REDIS_URL, **kwargs)  # type: ignore[attr-defined, no-untyped-call]
 
 
 def _purge_expired() -> None:
