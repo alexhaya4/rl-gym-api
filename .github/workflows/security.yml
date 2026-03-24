@@ -43,13 +43,30 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build Docker image
         run: docker build -t rl-gym-api:scan .
-      - name: Run Trivy vulnerability scanner
+      - name: Run Trivy vulnerability scanner (table)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: rl-gym-api:scan
           format: table
           exit-code: 0
           severity: CRITICAL,HIGH
+      - name: Run Trivy vulnerability scanner (SARIF)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: rl-gym-api:scan
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+        continue-on-error: true
+      - name: Upload SARIF as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-results
+          path: trivy-results.sarif
 
   secret-scan:
     name: Secret Scanning

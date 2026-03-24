@@ -13,6 +13,7 @@ from app.models.optuna_study import OptunaStudy
 from app.models.organization import Organization, OrganizationMember
 from app.models.pbt import PBTExperiment, PBTMember
 from app.models.registry import ModelRegistry
+from app.models.role import UserRole
 from app.models.subscription import Subscription
 from app.models.usage import UsageRecord
 from app.models.user import User
@@ -42,4 +43,5 @@ __all__ = [
     "Subscription",
     "UsageRecord",
     "User",
+    "UserRole",
 ]
