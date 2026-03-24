@@ -74,6 +74,15 @@ class Settings(BaseSettings):
     SANDBOX_MEMORY_LIMIT: str = "128m"
     SANDBOX_CPU_LIMIT: float = 0.5
 
+    # OAuth
+    OAUTH_STATE_SECRET: str = "change-me-oauth-state-secret"
+    GOOGLE_CLIENT_ID: str | None = None
+    GOOGLE_CLIENT_SECRET: str | None = None
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/oauth/google/callback"
+    GITHUB_CLIENT_ID: str | None = None
+    GITHUB_CLIENT_SECRET: str | None = None
+    GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/v1/oauth/github/callback"
+
     # CORS
     ALLOWED_ORIGINS: str = "http://localhost:3000"
 

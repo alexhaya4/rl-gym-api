@@ -8,6 +8,7 @@ from app.models.experiment import Experiment
 from app.models.job import Job
 from app.models.model_version import ModelVersion
 from app.models.multi_agent import AgentPolicy, MultiAgentExperiment
+from app.models.oauth_account import OAuthAccount
 from app.models.optuna_study import OptunaStudy
 from app.models.organization import Organization, OrganizationMember
 from app.models.pbt import PBTExperiment, PBTMember
@@ -32,6 +33,7 @@ __all__ = [
     "ModelRegistry",
     "ModelVersion",
     "MultiAgentExperiment",
+    "OAuthAccount",
     "OptunaStudy",
     "Organization",
     "OrganizationMember",
