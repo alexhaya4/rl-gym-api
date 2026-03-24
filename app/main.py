@@ -21,7 +21,7 @@ from app.core.rate_limit import limiter, rate_limit_exceeded_handler
 from app.db.session import get_db
 from app.grpc_server.server import start_grpc_server, stop_grpc_server
 
-VERSION = "0.1.0"
+VERSION = "1.1.0"
 
 
 @asynccontextmanager
