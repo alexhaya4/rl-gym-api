@@ -50,7 +50,8 @@
       "Bash(echo \"EXIT: $?\")",
       "Bash(alembic stamp:*)",
       "Bash(alembic current:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git tag:*)"
     ]
   }
 }

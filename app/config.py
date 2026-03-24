@@ -84,7 +84,7 @@ class Settings(BaseSettings):
     GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/v1/oauth/github/callback"
 
     # CORS
-    ALLOWED_ORIGINS: str = "http://localhost:3000"
+    ALLOWED_ORIGINS: str = "http://localhost:3000,https://rlgymapi.com,https://www.rlgymapi.com,https://dashboard.rlgymapi.com"
 
 
 @lru_cache
