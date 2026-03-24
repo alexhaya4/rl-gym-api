@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
@@ -11,6 +11,7 @@ from app.schemas.experiment import (
     ExperimentResponse,
     ExperimentUpdate,
 )
+from app.services.audit_log import log_event
 from app.services.experiment import (
     create_experiment,
     delete_experiment,
@@ -28,6 +29,7 @@ router = APIRouter(prefix="/experiments", tags=["experiments"])
 )
 async def create_experiment_endpoint(
     experiment_in: ExperimentCreate,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ) -> ExperimentResponse:
@@ -37,6 +39,11 @@ async def create_experiment_endpoint(
     and hyperparameters. The experiment starts in 'pending' status.
     """
     experiment = await create_experiment(db, experiment_in, current_user.id)
+    await log_event(
+        db, "experiment_create", request=request,
+        user_id=current_user.id, username=current_user.username,
+        resource_type="experiment", resource_id=str(experiment.id), action="create",
+    )
     return ExperimentResponse.model_validate(experiment)
 
 
@@ -120,6 +127,7 @@ async def update_experiment_endpoint(
 @router.delete("/{experiment_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_experiment_endpoint(
     experiment_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ) -> None:
@@ -134,6 +142,11 @@ async def delete_experiment_endpoint(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Experiment not found"
         )
+    await log_event(
+        db, "experiment_delete", request=request,
+        user_id=current_user.id, username=current_user.username,
+        resource_type="experiment", resource_id=str(experiment_id), action="delete",
+    )
 
 
 @router.get("/{experiment_id}/episodes", response_model=None)

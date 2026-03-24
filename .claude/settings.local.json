@@ -47,7 +47,9 @@
       "Bash(python:*)",
       "Bash(bandit:*)",
       "Bash(git config:*)",
-      "Bash(echo \"EXIT: $?\")"
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(alembic stamp:*)",
+      "Bash(alembic current:*)"
     ]
   }
 }

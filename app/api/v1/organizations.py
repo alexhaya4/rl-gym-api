@@ -2,7 +2,7 @@ import re
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +19,7 @@ from app.schemas.organization import (
     OrganizationMemberResponse,
     OrganizationResponse,
 )
+from app.services.audit_log import log_event
 from app.services.quota import get_or_create_usage, get_plan_limits
 
 router = APIRouter(prefix="/organizations", tags=["organizations"])
@@ -38,6 +39,7 @@ class AddMemberRequest(BaseModel):
 @router.post("", response_model=OrganizationResponse, status_code=status.HTTP_201_CREATED)
 async def create_organization(
     body: OrganizationCreate,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> Organization:
@@ -70,6 +72,11 @@ async def create_organization(
 
     await db.commit()
     await db.refresh(org)
+    await log_event(
+        db, "org_create", request=request,
+        user_id=current_user.id, username=current_user.username,
+        resource_type="organization", resource_id=str(org.id), action="create",
+    )
     return org
 
 

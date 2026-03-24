@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
@@ -9,6 +9,7 @@ from app.schemas.custom_environment import (
     CustomEnvironmentListResponse,
     CustomEnvironmentResponse,
 )
+from app.services.audit_log import log_event
 from app.services.custom_environment import (
     create_custom_environment,
     delete_custom_environment,
@@ -25,6 +26,7 @@ router = APIRouter(prefix="/custom-environments", tags=["custom-environments"])
 )
 async def register_custom_environment(
     env_in: CustomEnvironmentCreate,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ) -> CustomEnvironmentResponse:
@@ -35,6 +37,12 @@ async def register_custom_environment(
             detail="Source code too large. Maximum length is 100,000 characters.",
         )
     custom_env = await create_custom_environment(db, env_in, current_user.id)
+    await log_event(
+        db, "custom_env_register", request=request,
+        user_id=current_user.id, username=current_user.username,
+        resource_type="custom_environment", resource_id=str(custom_env.id),
+        action="create",
+    )
     return CustomEnvironmentResponse.model_validate(custom_env)
 
 

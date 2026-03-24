@@ -1,5 +1,6 @@
 from app.models.ab_test import ABTest, ABTestResult
 from app.models.artifact import Artifact, ArtifactLineage
+from app.models.audit_log import AuditLog
 from app.models.custom_environment import CustomEnvironment
 from app.models.dataset import Dataset, DatasetEpisode
 from app.models.episode import Episode
@@ -21,6 +22,7 @@ __all__ = [
     "AgentPolicy",
     "Artifact",
     "ArtifactLineage",
+    "AuditLog",
     "CustomEnvironment",
     "Dataset",
     "DatasetEpisode",

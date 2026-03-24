@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +13,7 @@ from app.schemas.registry import (
     RegistryListResponse,
     RollbackRequest,
 )
+from app.services.audit_log import log_event
 from app.services.registry import (
     compare_models,
     get_production_model,
@@ -94,6 +95,7 @@ async def get_production(
 async def promote(
     registry_id: int,
     request: PromoteRequest,
+    http_request: Request,
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ) -> RegistryEntry:
@@ -102,6 +104,12 @@ async def promote(
         entry = await promote_model(db, registry_id, request, current_user.id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from None
+    await log_event(
+        db, "model_promote", request=http_request,
+        user_id=current_user.id, username=current_user.username,
+        resource_type="model", resource_id=str(registry_id), action="promote",
+        details={"stage": request.target_stage},
+    )
     return RegistryEntry.model_validate(entry)
 
 
