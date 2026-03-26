@@ -41,6 +41,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          df -h
       - name: Build Docker image
         run: docker build -t rl-gym-api:scan .
       - name: Run Trivy vulnerability scanner (table)

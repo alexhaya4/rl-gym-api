@@ -1,81 +1,75 @@
 # RL Gym API
 
-A production-ready REST API for reinforcement learning experiments with OpenAI Gymnasium and Stable Baselines3.
-
+[![CI](https://github.com/alexhaya4/rl-gym-api/actions/workflows/ci.yml/badge.svg)](https://github.com/alexhaya4/rl-gym-api/actions/workflows/ci.yml)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)
-![CI](https://github.com/alexhaya4/rl-gym-api/actions/workflows/ci.yml/badge.svg)
 
-## Live Demo
+A production-grade RESTful API platform for reinforcement learning experiments built with FastAPI, OpenAI Gymnasium, and Stable Baselines3.
 
-**[https://rl-gym-api-production.up.railway.app/docs](https://rl-gym-api-production.up.railway.app/docs)**
+| Resource | Link |
+|---|---|
+| API | https://rl-gym-api-production.up.railway.app |
+| Swagger UI | https://rl-gym-api-production.up.railway.app/docs |
+| Dashboard | https://rl-gym-dashboard-production.up.railway.app |
+| GitHub | https://github.com/alexhaya4/rl-gym-api |
 
-Interactive API docs powered by Swagger UI. Register an account and explore all endpoints live.
+## Key Features
 
-## Overview
+- **JWT Authentication** with token blacklist, logout, and Redis-backed session invalidation
+- **Environment Management** for Gymnasium environments (CartPole, LunarLander, MountainCar, Acrobot, Pendulum)
+- **10 RL Algorithms**: PPO, A2C, DQN, SAC, TD3, DDPG, TQC, TRPO, ARS, RecurrentPPO via Stable Baselines3
+- **Real-time WebSocket Streaming** of training metrics
+- **Experiment Tracking** with full CRUD, pagination, and status filtering
+- **Benchmarking** across multiple algorithms and environments in a single request
+- **Model Registry** with staging, production, and archived lifecycle management
+- **A/B Testing** with statistical significance testing (t-test, Mann-Whitney U)
+- **Custom Environment Registration** with Docker sandbox validation
+- **Multi-Agent RL** with PettingZoo integration
+- **Vectorized Environments** supporting up to 32 parallel instances
+- **Population-Based Training (PBT)** for adaptive hyperparameter tuning
+- **Bayesian Hyperparameter Optimization** with Optuna
+- **Distributed Training** with Ray
+- **Data Versioning and Dataset Management**
+- **Experiment Comparison, Diff, and Artifact Lineage**
+- **gRPC Inference Endpoint** with Protocol Buffers
+- **Prometheus Metrics and Grafana Dashboard** for observability
+- **Multi-Tenancy with Stripe Billing** (free, pro, enterprise tiers)
+- **OAuth2 Login** (Google, GitHub) with account linking and RBAC with fine-grained permissions
+- **Prefect Pipeline Orchestration** for complex training workflows
+- **Immutable Audit Logging** for all user and system actions
 
-RL Gym API exposes Gymnasium environments as API endpoints, enabling remote training, evaluation, and real-time interaction with RL agents over HTTP and WebSockets. It supports multiple algorithms (PPO, A2C, DQN), cross-environment benchmarking, and full experiment lifecycle management. Built for researchers and engineers who need a scalable, containerized RL backend with JWT authentication and structured logging.
+## Security
 
-## Features
+Eight security phases completed:
 
-- **RL Environments** - Create, reset, step, and manage Gymnasium environments via REST
-- **Training** - Train agents with PPO, A2C, and DQN using Stable Baselines3
-- **Benchmarking** - Compare algorithms across multiple environments in a single request
-- **Experiments** - Full CRUD for experiment tracking with pagination and filtering
-- **WebSockets** - Real-time training metrics streaming
-- **JWT Authentication** - Secure endpoints with token-based auth
-- **Docker** - Multi-stage builds with PostgreSQL support
-- **CI/CD** - GitHub Actions pipeline with linting, testing, and Docker build verification
+- Token blacklist with Redis fallback for session invalidation
+- Request size limits (10 MB) and security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options)
+- gRPC API key authentication
+- Dependabot automated dependency updates
+- Bandit SAST scanning
+- Trivy container vulnerability scanning with SARIF output to GitHub Security tab
+- Gitleaks secret scanning
+- Docker sandbox isolation for custom environment code execution
+- RBAC with role-based permissions (owner, admin, member, viewer)
 
 ## Tech Stack
 
-| Technology | Version | Purpose |
-|---|---|---|
-| FastAPI | 0.115+ | Web framework and OpenAPI docs |
-| Uvicorn | 0.34+ | ASGI server |
-| Gymnasium | 1.0+ | RL environment interface |
-| Stable Baselines3 | 2.4+ | RL algorithm implementations |
-| PyTorch | 2.5+ | Neural network backend |
-| SQLAlchemy | 2.0+ | Async ORM and database access |
-| Alembic | 1.14+ | Database migrations |
-| Pydantic | 2.10+ | Request/response validation |
-| python-jose | 3.3+ | JWT token encoding/decoding |
-| slowapi | 0.1.9+ | Rate limiting |
-| Ruff | 0.8+ | Linting and formatting |
-| pytest | 8.3+ | Testing framework |
+| Category | Technologies |
+|---|---|
+| Language & Framework | Python 3.12, FastAPI, Uvicorn |
+| RL Libraries | Stable Baselines3, Gymnasium, PettingZoo |
+| Database | PostgreSQL, SQLAlchemy Async, Alembic |
+| Cache & Queue | Redis, ARQ job queue |
+| APIs | REST, gRPC with Protocol Buffers, WebSockets |
+| Optimization | Optuna, Ray, Prefect |
+| Monitoring | Prometheus, Grafana |
+| Auth | JWT (python-jose), OAuth2 (Google, GitHub), RBAC |
+| Billing | Stripe |
+| CI/CD | GitHub Actions, Docker, Railway |
+| Code Quality | Ruff, mypy, pytest, Bandit, Trivy, Gitleaks |
 
-## Project Structure
-
-```
-app/
-├── api/v1/              # Route handlers
-│   ├── auth.py          #   Registration and login
-│   ├── environments.py  #   Gymnasium environment management
-│   ├── training.py      #   RL agent training
-│   ├── experiments.py   #   Experiment CRUD
-│   ├── benchmarks.py    #   Algorithm benchmarking
-│   └── websockets.py    #   Real-time metrics streaming
-├── core/                # Cross-cutting concerns
-│   ├── health.py        #   Health check with DB connectivity
-│   ├── logging.py       #   JSON logging and RequestID middleware
-│   ├── rate_limit.py    #   Rate limiting configuration
-│   └── security.py      #   JWT token utilities
-├── db/                  # Database layer
-│   ├── session.py       #   Async engine and session factory
-│   └── init_db.py       #   Table initialization
-├── models/              # SQLAlchemy ORM models
-│   ├── user.py          #   User model
-│   ├── experiment.py    #   Experiment model
-│   └── episode.py       #   Episode model
-├── schemas/             # Pydantic request/response schemas
-├── services/            # Business logic layer
-├── config.py            # Settings from environment variables
-├── dependencies.py      # FastAPI dependency injection (auth, DB)
-└── main.py              # App factory, middleware, router setup
-```
-
-## Quick Start
+## Getting Started
 
 ```bash
 # Clone the repo
@@ -92,86 +86,29 @@ pip install -e ".[dev]"
 
 # Configure environment
 cp .env.example .env
-# Edit .env with your SECRET_KEY
+# Edit .env and set a strong SECRET_KEY (>= 32 characters)
 
-# Run the dev server
+# Run database migrations
+alembic upgrade head
+
+# Start the dev server
 uvicorn app.main:app --reload
 ```
 
-The API will be available at `http://localhost:8000`. Interactive docs at `/docs` (Swagger) and `/redoc` (ReDoc).
+The API will be available at `http://localhost:8000`. Interactive docs at `/docs` (Swagger UI) and `/redoc` (ReDoc).
 
-## API Endpoints
+## API Reference
 
-### Authentication
+Full interactive documentation is available at the Swagger UI:
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| POST | `/api/v1/auth/register` | No | Register a new user |
-| POST | `/api/v1/auth/login` | No | Login and receive JWT token |
-| GET | `/api/v1/auth/me` | Yes | Get current user profile |
+**https://rl-gym-api-production.up.railway.app/docs**
 
-### Environments
+All endpoints are grouped by tag: auth, environments, training, experiments, benchmarks, algorithms, registry, ab-testing, custom-environments, organizations, rbac, audit, oauth, and more.
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| GET | `/api/v1/environments/available` | No | List available Gymnasium environments |
-| POST | `/api/v1/environments/` | Yes | Create an environment instance |
-| POST | `/api/v1/environments/{id}/reset` | Yes | Reset environment to initial state |
-| POST | `/api/v1/environments/{id}/step` | Yes | Take a step with an action |
-| DELETE | `/api/v1/environments/{id}` | Yes | Close and remove environment |
+## Testing
 
-### Training
-
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| POST | `/api/v1/training/` | Yes | Start a training session |
-| GET | `/api/v1/training/{id}` | Yes | Get training status |
-| GET | `/api/v1/training/` | Yes | List all training sessions |
-
-### Experiments
-
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| POST | `/api/v1/experiments` | Yes | Create a new experiment |
-| GET | `/api/v1/experiments` | Yes | List experiments (paginated, filterable) |
-| GET | `/api/v1/experiments/{id}` | Yes | Get experiment details |
-| PATCH | `/api/v1/experiments/{id}` | Yes | Update experiment fields |
-| DELETE | `/api/v1/experiments/{id}` | Yes | Delete an experiment |
-| GET | `/api/v1/experiments/{id}/episodes` | Yes | List episodes for an experiment |
-
-### Benchmarks
-
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| POST | `/api/v1/benchmarks/run` | Yes | Run benchmark across envs and algorithms |
-| GET | `/api/v1/benchmarks/environments` | No | List available benchmark environments |
-| GET | `/api/v1/benchmarks/algorithms` | No | List supported algorithms |
-
-### Other
-
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| GET | `/health` | No | Health check with DB status |
-| GET | `/api/v1/status` | No | API status, uptime, active environments |
-| WS | `/api/v1/ws/training/{id}` | No | Real-time training metrics stream |
-
-## Docker
-
-```bash
-# Start API and PostgreSQL
-docker compose up --build
-
-# Run in background
-docker compose up -d
-```
-
-The compose file starts a PostgreSQL 16 database alongside the API. Set the database URL in your `.env`:
-
-```
-DATABASE_URL=postgresql+asyncpg://rl_gym:rl_gym@postgres:5432/rl_gym
-```
-
-## Running Tests
+- **228 tests** with **62% coverage**
+- In-memory SQLite database (no external services required)
 
 ```bash
 # Full test suite with coverage
@@ -180,34 +117,54 @@ pytest tests/ -v --cov=app --cov-report=term-missing
 # Run a specific test file
 pytest tests/test_experiments.py -v
 
-# Lint
-ruff check app/ tests/
+# Lint and format
+ruff check app/ tests/ --fix
+ruff format app/ tests/
 
 # Type check
 mypy app/ --ignore-missing-imports
 ```
 
-Tests use an in-memory SQLite database and require no external services.
+## Project Structure
 
-## Environment Variables
+```
+app/
+├── api/v1/           # Route handlers (auth, environments, training, experiments,
+│                     #   benchmarks, registry, ab_testing, algorithms, audit,
+│                     #   oauth, rbac, custom_environments, organizations, ...)
+├── core/             # Cross-cutting: logging, rate limiting, security, health,
+│                     #   permissions, algorithms, Prometheus metrics
+├── db/               # SQLAlchemy async engine, session factory, Base
+├── models/           # ORM models (User, Experiment, Episode, Job, ABTest, ...)
+├── schemas/          # Pydantic v2 request/response validation
+├── services/         # Business logic layer
+├── grpc_server/      # gRPC inference endpoint with Protocol Buffers
+├── config.py         # pydantic-settings, reads from .env
+├── dependencies.py   # FastAPI deps: auth, DB session, ARQ Redis
+└── main.py           # App factory, middleware stack, router registration
+tests/                # 228 tests (pytest, async, in-memory SQLite)
+alembic/              # Database migration scripts
+```
 
-| Variable | Default | Description |
-|---|---|---|
-| `SECRET_KEY` | `change-me-to-a-random-secret-key` | JWT signing key |
-| `DATABASE_URL` | `sqlite+aiosqlite:///./rl_gym.db` | Database connection string |
-| `ENVIRONMENT` | `development` | Environment name (development/test/production) |
-| `LOG_LEVEL` | `INFO` | Logging level |
-| `ALLOWED_ORIGINS` | `http://localhost:3000` | CORS allowed origins (comma-separated) |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | JWT token expiry |
+## Deployment
 
-## Contributing
+The API is deployed on **Railway** using Docker. The CI/CD pipeline (GitHub Actions) runs linting, type checking, tests, security scans (Bandit, Trivy, Gitleaks), and Docker build verification on every push to `master`.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Make your changes and add tests
-4. Run `ruff check app/ tests/ --fix` and `pytest tests/ -v`
-5. Commit and push to your branch
-6. Open a pull request against `master`
+```bash
+# Docker
+docker compose up --build
+
+# Run in background
+docker compose up -d
+```
+
+## Related Projects
+
+- [rl-gym-dashboard](https://github.com/alexhaya4/rl-gym-dashboard) - Frontend dashboard for RL Gym API
+
+## Author
+
+**Alex Odhiambo Haya** - [alexhaya4@gmail.com](mailto:alexhaya4@gmail.com)
 
 ## License
 
