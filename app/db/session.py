@@ -22,6 +22,12 @@ def create_db_engine(url: str) -> AsyncEngine:
             connect_args={"timeout": settings.DB_COMMAND_TIMEOUT, "check_same_thread": False},
         )
     if url.startswith("postgresql"):
+        connect_args: dict = {
+            "command_timeout": settings.DB_COMMAND_TIMEOUT,
+            "timeout": 10,
+        }
+        if "proxy.rlwy.net" in url or "railway" in url:
+            connect_args["ssl"] = "require"
         return create_async_engine(
             url,
             pool_size=settings.DB_POOL_SIZE,
@@ -29,10 +35,7 @@ def create_db_engine(url: str) -> AsyncEngine:
             pool_timeout=settings.DB_POOL_TIMEOUT,
             pool_pre_ping=True,
             pool_recycle=3600,
-            connect_args={
-                "command_timeout": settings.DB_COMMAND_TIMEOUT,
-                "timeout": 10,
-            },
+            connect_args=connect_args,
         )
     return create_async_engine(url)
 
