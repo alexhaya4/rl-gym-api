@@ -102,8 +102,6 @@ class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Add security headers to every response."""
 
-    DOCS_PATHS = {"/docs", "/redoc", "/openapi.json"}
-
     async def dispatch(self, request: Request, call_next: Any) -> Response:
         settings = get_settings()
         response: Response = await call_next(request)
