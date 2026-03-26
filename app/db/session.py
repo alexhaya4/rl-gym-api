@@ -1,4 +1,5 @@
 from collections.abc import AsyncGenerator
+from typing import Any
 
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -22,7 +23,7 @@ def create_db_engine(url: str) -> AsyncEngine:
             connect_args={"timeout": settings.DB_COMMAND_TIMEOUT, "check_same_thread": False},
         )
     if url.startswith("postgresql"):
-        connect_args: dict = {
+        connect_args: dict[str, Any] = {
             "command_timeout": settings.DB_COMMAND_TIMEOUT,
             "timeout": 10,
         }
