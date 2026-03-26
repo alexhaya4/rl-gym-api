@@ -164,7 +164,7 @@ docker compose up -d
 
 ## Author
 
-**Alex Odhiambo Haya** - [alexhaya4@gmail.com](mailto:alexhaya4@gmail.com)
+**Alex Odhiambo Haya** - [alexhaya4@gmail.com](mailto:alexhaya19@gmail.com)
 
 ## License
 
