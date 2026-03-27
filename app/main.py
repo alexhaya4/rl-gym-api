@@ -32,6 +32,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     _validate_secret_key(settings, logger)
 
+    # Ensure all tables exist (imports register models with Base.metadata)
+    import app.models as _models  # noqa: F401
+    from app.db.session import Base, engine
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    logger.info("Database tables verified/created")
+
     # Initialize custom Prometheus metrics (register collectors on import)
     import app.core.prometheus as _  # noqa: F401
     await start_grpc_server(port=settings.GRPC_PORT)
