@@ -46,11 +46,12 @@ async def test_cluster_info(client: AsyncClient, auth_headers: dict[str, str]) -
 async def test_list_jobs_empty(
     client: AsyncClient, auth_headers: dict[str, str]
 ) -> None:
-    """GET /distributed/jobs returns empty list."""
-    response = await client.get(
-        "/api/v1/distributed/jobs",
-        headers=auth_headers,
-    )
+    """GET /distributed/jobs returns empty list for a new user."""
+    with patch("app.services.distributed._list_all_jobs", return_value=[]):
+        response = await client.get(
+            "/api/v1/distributed/jobs",
+            headers=auth_headers,
+        )
     assert response.status_code == 200
     assert response.json() == []
 
