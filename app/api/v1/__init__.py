@@ -29,6 +29,7 @@ from app.api.v1.rbac import router as rbac_router
 from app.api.v1.registry import router as registry_router
 from app.api.v1.training import router as training_router
 from app.api.v1.vec_environments import router as vec_environments_router
+from app.api.v1.video import router as video_router
 from app.api.v1.websockets import router as ws_router
 from app.config import get_settings
 from app.services.environment import _environments
@@ -62,6 +63,7 @@ router.include_router(pipelines_router)
 router.include_router(rbac_router)
 router.include_router(registry_router)
 router.include_router(vec_environments_router)
+router.include_router(video_router)
 router.include_router(ws_router)
 
 
