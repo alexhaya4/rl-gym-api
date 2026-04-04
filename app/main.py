@@ -42,9 +42,20 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     # Initialize custom Prometheus metrics (register collectors on import)
     import app.core.prometheus as _  # noqa: F401
+
     await start_grpc_server(port=settings.GRPC_PORT)
     yield
     await stop_grpc_server()
+
+    # Shutdown Ray if it was initialized
+    try:
+        import ray
+
+        if ray.is_initialized():
+            ray.shutdown()
+            logger.info("Ray cluster shut down")
+    except ImportError:
+        pass
 
 
 def _validate_secret_key(settings: Any, logger: logging.Logger) -> None:
@@ -95,8 +106,11 @@ class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
                 if len(body) > self.max_bytes:
                     return JSONResponse(
                         status_code=413,
-                        content={"detail": "Request body too large. Maximum size is 10MB."},
+                        content={
+                            "detail": "Request body too large. Maximum size is 10MB."
+                        },
                     )
+
             # Re-inject the consumed body so downstream handlers can read it
             async def receive() -> dict[str, Any]:
                 return {"type": "http.request", "body": body}
@@ -117,7 +131,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        response.headers["Permissions-Policy"] = (
+            "geolocation=(), microphone=(), camera=()"
+        )
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fastapi.tiangolo.com; "
@@ -165,16 +181,27 @@ def create_app() -> FastAPI:
             {"name": "auth", "description": "User registration and JWT authentication"},
             {"name": "environments", "description": "Gymnasium environment management"},
             {"name": "training", "description": "RL agent training and evaluation"},
-            {"name": "experiments", "description": "Experiment tracking and lifecycle management"},
-            {"name": "benchmarks", "description": "Algorithm benchmarking across environments"},
-            {"name": "websockets", "description": "Real-time training metrics via WebSocket"},
+            {
+                "name": "experiments",
+                "description": "Experiment tracking and lifecycle management",
+            },
+            {
+                "name": "benchmarks",
+                "description": "Algorithm benchmarking across environments",
+            },
+            {
+                "name": "websockets",
+                "description": "Real-time training metrics via WebSocket",
+            },
             {"name": "status", "description": "API status and health checks"},
         ],
     )
 
     logger = logging.getLogger(__name__)
 
-    async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    async def generic_exception_handler(
+        request: Request, exc: Exception
+    ) -> JSONResponse:
         if settings.ENVIRONMENT == "production":
             logger.exception("Unhandled exception")
             return JSONResponse(

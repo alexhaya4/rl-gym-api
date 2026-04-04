@@ -13,6 +13,7 @@ from app.api.v1.billing import router as billing_router
 from app.api.v1.comparison import router as comparison_router
 from app.api.v1.custom_environments import router as custom_environments_router
 from app.api.v1.datasets import router as datasets_router
+from app.api.v1.distributed import router as distributed_router
 from app.api.v1.environments import router as environments_router
 from app.api.v1.evaluation import router as evaluation_router
 from app.api.v1.experiments import router as experiments_router
@@ -46,6 +47,7 @@ router.include_router(auth_router)
 router.include_router(comparison_router)
 router.include_router(custom_environments_router)
 router.include_router(datasets_router)
+router.include_router(distributed_router)
 router.include_router(environments_router)
 router.include_router(training_router)
 router.include_router(experiments_router)

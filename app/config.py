@@ -91,6 +91,11 @@ class Settings(BaseSettings):
     MAX_DATASET_SIZE_MB: int = 100
     ALLOWED_DATASET_EXTENSIONS: list[str] = [".csv", ".json", ".zip"]
 
+    # Distributed Training
+    DISTRIBUTED_ENABLED: bool = True
+    DISTRIBUTED_MAX_WORKERS: int = 4
+    DISTRIBUTED_JOB_TTL_HOURS: int = 24
+
     # Video
     VIDEO_STORAGE_PATH: str = "/tmp/rl_videos"  # nosec B108 - configurable via env var
     MAX_VIDEO_SIZE_MB: int = 100
