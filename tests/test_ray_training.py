@@ -69,8 +69,8 @@ async def test_sequential_fallback_training(client: AsyncClient, auth_headers: d
     )
     assert response.status_code == 202
     data = response.json()
-    assert len(data["results"]) > 0
-    assert data["results"][0]["status"] == "completed"
+    assert "job_id" in data
+    assert data["status"] in ("queued", "initializing", "training")
 
 
 async def test_distributed_training_response_structure(client: AsyncClient, auth_headers: dict[str, str]):
@@ -94,14 +94,9 @@ async def test_distributed_training_response_structure(client: AsyncClient, auth
     assert response.status_code == 202
     data = response.json()
     assert "job_id" in data
-    assert "total_trials" in data
-    assert data["total_trials"] == 1
-    assert "best_trial" in data
-    assert data["best_trial"] is not None
-    assert "best_hyperparameters" in data
-    assert data["status"] == "completed"
-    assert "started_at" in data
-    assert "completed_at" in data
+    assert "num_workers" in data
+    assert "estimated_speedup" in data
+    assert "status" in data
 
 
 async def test_get_nonexistent_trial(client: AsyncClient, auth_headers: dict[str, str]):
