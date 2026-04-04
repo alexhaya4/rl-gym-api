@@ -9,6 +9,7 @@ from alembic import context
 
 from app.config import get_settings
 from app.models import Episode, Experiment, User  # noqa: F401
+from app.models.ml_model import MLModel  # noqa: F401
 from app.db.session import Base
 
 settings = get_settings()
