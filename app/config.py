@@ -83,6 +83,9 @@ class Settings(BaseSettings):
     GITHUB_CLIENT_SECRET: str | None = None
     GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/v1/oauth/github/callback"
 
+    # Inference
+    INFERENCE_CACHE_MAX_MODELS: int = 5
+
     # CORS
     ALLOWED_ORIGINS: str = "http://localhost:3000,https://rlgymapi.com,https://www.rlgymapi.com,https://dashboard.rlgymapi.com"
 
