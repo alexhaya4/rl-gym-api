@@ -3,6 +3,7 @@ import csv
 import io
 import json
 import logging
+import os
 from typing import Any
 
 import gymnasium as gym
@@ -68,16 +69,18 @@ async def add_episodes(
     lengths: list[int] = []
 
     for ep in episodes:
-        db.add(DatasetEpisode(
-            dataset_id=dataset_id,
-            episode_number=ep.episode_number,
-            total_reward=ep.total_reward,
-            episode_length=ep.episode_length,
-            observations=ep.observations,
-            actions=ep.actions,
-            rewards=ep.rewards,
-            terminated=ep.terminated,
-        ))
+        db.add(
+            DatasetEpisode(
+                dataset_id=dataset_id,
+                episode_number=ep.episode_number,
+                total_reward=ep.total_reward,
+                episode_length=ep.episode_length,
+                observations=ep.observations,
+                actions=ep.actions,
+                rewards=ep.rewards,
+                terminated=ep.terminated,
+            )
+        )
         total_transitions += ep.episode_length
         rewards.append(ep.total_reward)
         lengths.append(ep.episode_length)
@@ -98,9 +101,7 @@ async def add_episodes(
 
 async def get_dataset(db: AsyncSession, dataset_id: int) -> Dataset | None:
     """Get a dataset by id."""
-    result = await db.execute(
-        select(Dataset).where(Dataset.id == dataset_id)
-    )
+    result = await db.execute(select(Dataset).where(Dataset.id == dataset_id))
     return result.scalar_one_or_none()
 
 
@@ -119,9 +120,7 @@ async def list_datasets(
     return list(result.scalars().all())
 
 
-async def delete_dataset(
-    db: AsyncSession, dataset_id: int, user_id: int
-) -> bool:
+async def delete_dataset(db: AsyncSession, dataset_id: int, user_id: int) -> bool:
     """Delete a dataset and its episodes."""
     result = await db.execute(
         select(Dataset).where(Dataset.id == dataset_id, Dataset.user_id == user_id)
@@ -131,22 +130,16 @@ async def delete_dataset(
         return False
 
     await db.execute(
-        DatasetEpisode.__table__.delete().where(
-            DatasetEpisode.dataset_id == dataset_id
-        )
+        DatasetEpisode.__table__.delete().where(DatasetEpisode.dataset_id == dataset_id)
     )
     await db.delete(dataset)
     await db.commit()
     return True
 
 
-async def get_dataset_stats(
-    db: AsyncSession, dataset_id: int
-) -> DatasetStatsResponse:
+async def get_dataset_stats(db: AsyncSession, dataset_id: int) -> DatasetStatsResponse:
     """Calculate comprehensive statistics for a dataset."""
-    result = await db.execute(
-        select(Dataset).where(Dataset.id == dataset_id)
-    )
+    result = await db.execute(select(Dataset).where(Dataset.id == dataset_id))
     dataset = result.scalar_one_or_none()
     if dataset is None:
         raise ValueError(f"Dataset {dataset_id} not found")
@@ -178,18 +171,26 @@ async def get_dataset_stats(
         dataset_id=dataset_id,
         n_episodes=len(episodes),
         n_transitions=sum(lengths) if lengths else 0,
-        mean_episode_reward=float(rewards_array.mean()) if len(rewards_array) > 0 else None,
-        std_episode_reward=float(rewards_array.std()) if len(rewards_array) > 0 else None,
-        min_episode_reward=float(rewards_array.min()) if len(rewards_array) > 0 else None,
-        max_episode_reward=float(rewards_array.max()) if len(rewards_array) > 0 else None,
-        mean_episode_length=float(lengths_array.mean()) if len(lengths_array) > 0 else None,
+        mean_episode_reward=float(rewards_array.mean())
+        if len(rewards_array) > 0
+        else None,
+        std_episode_reward=float(rewards_array.std())
+        if len(rewards_array) > 0
+        else None,
+        min_episode_reward=float(rewards_array.min())
+        if len(rewards_array) > 0
+        else None,
+        max_episode_reward=float(rewards_array.max())
+        if len(rewards_array) > 0
+        else None,
+        mean_episode_length=float(lengths_array.mean())
+        if len(lengths_array) > 0
+        else None,
         reward_distribution=rewards_array.tolist() if len(rewards_array) > 0 else [],
     )
 
 
-async def export_dataset(
-    db: AsyncSession, dataset_id: int, format: str
-) -> bytes:
+async def export_dataset(db: AsyncSession, dataset_id: int, format: str) -> bytes:
     """Export dataset episodes in the specified format."""
     ep_result = await db.execute(
         select(DatasetEpisode)
@@ -271,15 +272,17 @@ def _collect_episodes_sync(
             actions.append(action_val)
             rewards.append(float(reward))
 
-        collected.append({
-            "episode_number": ep_num + 1,
-            "total_reward": sum(rewards),
-            "episode_length": len(rewards),
-            "observations": observations,
-            "actions": actions,
-            "rewards": rewards,
-            "terminated": terminated,
-        })
+        collected.append(
+            {
+                "episode_number": ep_num + 1,
+                "total_reward": sum(rewards),
+                "episode_length": len(rewards),
+                "observations": observations,
+                "actions": actions,
+                "rewards": rewards,
+                "terminated": terminated,
+            }
+        )
 
     env.close()
     return collected
@@ -307,11 +310,220 @@ async def collect_trajectory(
 
     episodes = [DatasetEpisodeCreate(**ep) for ep in raw_episodes]
 
-    result = await db.execute(
-        select(Dataset).where(Dataset.id == dataset_id)
-    )
+    result = await db.execute(select(Dataset).where(Dataset.id == dataset_id))
     dataset = result.scalar_one_or_none()
     if dataset is None:
         raise ValueError(f"Dataset {dataset_id} not found")
 
     return await add_episodes(db, dataset_id, episodes, dataset.user_id)
+
+
+# --- File-upload dataset functions ---
+
+
+def validate_file(filename: str, size_bytes: int) -> None:
+    """Validate file extension and size for upload."""
+    from app.config import get_settings
+
+    settings = get_settings()
+    ext = os.path.splitext(filename)[1].lower()
+    if ext not in settings.ALLOWED_DATASET_EXTENSIONS:
+        raise ValueError(
+            f"File extension '{ext}' not allowed. "
+            f"Allowed: {settings.ALLOWED_DATASET_EXTENSIONS}"
+        )
+    max_bytes = settings.MAX_DATASET_SIZE_MB * 1024 * 1024
+    if size_bytes > max_bytes:
+        raise ValueError(
+            f"File size ({size_bytes / 1024 / 1024:.1f} MB) exceeds "
+            f"maximum ({settings.MAX_DATASET_SIZE_MB} MB)"
+        )
+
+
+async def upload_csv(
+    db: AsyncSession,
+    file_content: bytes,
+    filename: str,
+    name: str,
+    description: str | None,
+    user_id: int,
+) -> Dataset:
+    """Upload a CSV file, parse metadata, and create a DB record."""
+    import os
+    import uuid
+
+    import pandas as pd
+
+    from app.config import get_settings
+
+    settings = get_settings()
+
+    # Determine dataset type from extension
+    ext = os.path.splitext(filename)[1].lower()
+    dataset_type = "csv" if ext == ".csv" else ext.lstrip(".")
+
+    # Save file
+    user_dir = os.path.join(settings.DATASET_STORAGE_PATH, str(user_id))
+    os.makedirs(user_dir, exist_ok=True)
+    safe_name = f"{uuid.uuid4().hex}_{filename}"
+    file_path = os.path.join(user_dir, safe_name)
+
+    with open(file_path, "wb") as f:
+        f.write(file_content)
+
+    file_size_bytes = len(file_content)
+
+    # Parse CSV for metadata
+    num_samples: int | None = None
+    num_features: int | None = None
+    columns_list: list[str] | None = None
+
+    if ext == ".csv":
+        try:
+            df = pd.read_csv(io.BytesIO(file_content))
+            num_samples = len(df)
+            num_features = len(df.columns)
+            columns_list = df.columns.tolist()
+        except Exception:
+            logger.warning("Could not parse CSV metadata for %s", filename)
+    elif ext == ".json":
+        try:
+            data = json.loads(file_content)
+            if isinstance(data, list) and len(data) > 0:
+                num_samples = len(data)
+                if isinstance(data[0], dict):
+                    columns_list = list(data[0].keys())
+                    num_features = len(columns_list)
+        except Exception:
+            logger.warning("Could not parse JSON metadata for %s", filename)
+
+    # Create DB record
+    result = await db.execute(
+        select(func.coalesce(func.max(Dataset.version), 0)).where(Dataset.name == name)
+    )
+    next_version = result.scalar_one() + 1
+
+    dataset = Dataset(
+        name=name,
+        version=next_version,
+        description=description,
+        environment_id="uploaded",
+        dataset_type=dataset_type,
+        file_path=file_path,
+        num_samples=num_samples,
+        num_features=num_features,
+        columns=columns_list,
+        file_size_bytes=file_size_bytes,
+        user_id=user_id,
+    )
+    db.add(dataset)
+    await db.commit()
+    await db.refresh(dataset)
+    return dataset
+
+
+async def get_file_dataset(
+    db: AsyncSession, dataset_id: int, user_id: int
+) -> Dataset | None:
+    """Get a file-uploaded dataset owned by the user."""
+    result = await db.execute(
+        select(Dataset).where(
+            Dataset.id == dataset_id,
+            Dataset.user_id == user_id,
+            Dataset.file_path.isnot(None),
+        )
+    )
+    return result.scalar_one_or_none()
+
+
+async def get_preview(
+    db: AsyncSession, dataset_id: int, user_id: int, limit: int = 10
+) -> dict[str, Any]:
+    """Return a preview of the first N rows of a file dataset."""
+    import pandas as pd
+
+    dataset = await get_file_dataset(db, dataset_id, user_id)
+    if dataset is None:
+        raise ValueError("Dataset not found or not a file dataset")
+
+    if dataset.dataset_type == "csv" and dataset.file_path:
+        df = pd.read_csv(dataset.file_path, nrows=limit)
+        total_df = pd.read_csv(dataset.file_path)
+        return {
+            "rows": df.replace({np.nan: None}).to_dict(orient="records"),
+            "total_rows": len(total_df),
+            "columns": df.columns.tolist(),
+        }
+    elif dataset.dataset_type == "json" and dataset.file_path:
+        with open(dataset.file_path) as f:
+            data = json.load(f)
+        if isinstance(data, list):
+            rows = data[:limit]
+            columns = list(rows[0].keys()) if rows and isinstance(rows[0], dict) else []
+            return {
+                "rows": rows,
+                "total_rows": len(data),
+                "columns": columns,
+            }
+
+    raise ValueError(f"Preview not supported for dataset type: {dataset.dataset_type}")
+
+
+async def get_file_statistics(
+    db: AsyncSession, dataset_id: int, user_id: int
+) -> list[dict[str, Any]]:
+    """Compute per-column statistics for a CSV dataset."""
+    import pandas as pd
+
+    dataset = await get_file_dataset(db, dataset_id, user_id)
+    if dataset is None:
+        raise ValueError("Dataset not found or not a file dataset")
+
+    if dataset.dataset_type != "csv" or not dataset.file_path:
+        raise ValueError("Statistics only supported for CSV datasets")
+
+    df = pd.read_csv(dataset.file_path)
+    stats: list[dict[str, Any]] = []
+
+    for col in df.columns:
+        col_stats: dict[str, Any] = {
+            "column_name": col,
+            "dtype": str(df[col].dtype),
+            "null_count": int(df[col].isnull().sum()),
+            "unique_count": int(df[col].nunique()),
+        }
+        if pd.api.types.is_numeric_dtype(df[col]):
+            desc = df[col].describe()
+            col_stats["mean"] = (
+                float(desc["mean"]) if not pd.isna(desc["mean"]) else None
+            )
+            col_stats["std"] = float(desc["std"]) if not pd.isna(desc["std"]) else None
+            col_stats["min"] = float(desc["min"]) if not pd.isna(desc["min"]) else None
+            col_stats["max"] = float(desc["max"]) if not pd.isna(desc["max"]) else None
+        else:
+            col_stats["mean"] = None
+            col_stats["std"] = None
+            col_stats["min"] = None
+            col_stats["max"] = None
+        stats.append(col_stats)
+
+    return stats
+
+
+async def delete_file_dataset(db: AsyncSession, dataset_id: int, user_id: int) -> bool:
+    """Delete a file dataset, removing both file and DB record."""
+    dataset = await get_file_dataset(db, dataset_id, user_id)
+    if dataset is None:
+        return False
+
+    # Delete file
+    if dataset.file_path and os.path.exists(dataset.file_path):
+        os.remove(dataset.file_path)
+
+    # Delete episodes if any
+    await db.execute(
+        DatasetEpisode.__table__.delete().where(DatasetEpisode.dataset_id == dataset_id)
+    )
+    await db.delete(dataset)
+    await db.commit()
+    return True

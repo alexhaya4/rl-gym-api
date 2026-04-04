@@ -41,6 +41,12 @@ class Dataset(Base):
     storage_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
     storage_format: Mapped[str] = mapped_column(String(20), default="json")
     size_bytes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    dataset_type: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    file_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    num_samples: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    num_features: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    columns: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    file_size_bytes: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_public: Mapped[bool] = mapped_column(Boolean, default=False)
     tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     metadata_: Mapped[dict[str, Any] | None] = mapped_column(
@@ -62,9 +68,7 @@ class Dataset(Base):
 
 class DatasetEpisode(Base):
     __tablename__ = "dataset_episodes"
-    __table_args__ = (
-        Index("ix_dataset_episodes_dataset_id", "dataset_id"),
-    )
+    __table_args__ = (Index("ix_dataset_episodes_dataset_id", "dataset_id"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     dataset_id: Mapped[int] = mapped_column(

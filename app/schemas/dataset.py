@@ -80,3 +80,56 @@ class DatasetStatsResponse(BaseModel):
     max_episode_reward: float | None
     mean_episode_length: float | None
     reward_distribution: list[float]
+
+
+# --- File-upload dataset schemas ---
+
+
+class FileDatasetResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    description: str | None
+    dataset_type: str | None
+    num_samples: int | None
+    num_features: int | None
+    columns: list[str] | None
+    file_size_mb: float | None
+    owner_id: int
+    created_at: datetime
+
+    @classmethod
+    def from_dataset(cls, dataset: Any) -> "FileDatasetResponse":
+        file_size_mb = None
+        if dataset.file_size_bytes is not None:
+            file_size_mb = round(dataset.file_size_bytes / 1024 / 1024, 4)
+        return cls(
+            id=dataset.id,
+            name=dataset.name,
+            description=dataset.description,
+            dataset_type=dataset.dataset_type,
+            num_samples=dataset.num_samples,
+            num_features=dataset.num_features,
+            columns=dataset.columns,
+            file_size_mb=file_size_mb,
+            owner_id=dataset.user_id,
+            created_at=dataset.created_at,
+        )
+
+
+class DatasetPreview(BaseModel):
+    rows: list[dict[str, Any]]
+    total_rows: int
+    columns: list[str]
+
+
+class DatasetStatistics(BaseModel):
+    column_name: str
+    dtype: str
+    mean: float | None = None
+    std: float | None = None
+    min: float | None = None
+    max: float | None = None
+    null_count: int = 0
+    unique_count: int = 0

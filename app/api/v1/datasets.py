@@ -1,5 +1,14 @@
-
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
 from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -14,18 +23,26 @@ from app.schemas.dataset import (
     DatasetEpisodeCreate,
     DatasetEpisodeResponse,
     DatasetListResponse,
+    DatasetPreview,
     DatasetResponse,
+    DatasetStatistics,
     DatasetStatsResponse,
+    FileDatasetResponse,
 )
 from app.services.dataset import (
     add_episodes,
     collect_trajectory,
     create_dataset,
     delete_dataset,
+    delete_file_dataset,
     export_dataset,
     get_dataset,
     get_dataset_stats,
+    get_file_statistics,
+    get_preview,
     list_datasets,
+    upload_csv,
+    validate_file,
 )
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
@@ -207,5 +224,97 @@ async def delete(
     db: AsyncSession = Depends(get_db),
 ) -> None:
     """Delete a dataset and its episodes."""
+    # Try file dataset first, then trajectory dataset
+    if await delete_file_dataset(db, dataset_id, current_user.id):
+        return
     if not await delete_dataset(db, dataset_id, current_user.id):
         raise HTTPException(status_code=404, detail="Dataset not found")
+
+
+# --- File-upload endpoints ---
+
+
+@router.post("/upload", response_model=FileDatasetResponse, status_code=201)
+async def upload_file(
+    file: UploadFile = File(...),
+    name: str = Form(...),
+    description: str | None = Form(None),
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+) -> FileDatasetResponse:
+    """Upload a CSV/JSON/ZIP dataset file."""
+    if file.filename is None:
+        raise HTTPException(status_code=422, detail="Filename is required")
+
+    content = await file.read()
+
+    try:
+        validate_file(file.filename, len(content))
+    except ValueError as e:
+        detail = str(e)
+        if "extension" in detail:
+            raise HTTPException(status_code=422, detail=detail) from None
+        raise HTTPException(status_code=413, detail=detail) from None
+
+    dataset = await upload_csv(
+        db,
+        file_content=content,
+        filename=file.filename,
+        name=name,
+        description=description,
+        user_id=current_user.id,
+    )
+    return FileDatasetResponse.from_dataset(dataset)
+
+
+@router.get(
+    "/file/{dataset_id}",
+    response_model=FileDatasetResponse,
+)
+async def get_file_dataset_endpoint(
+    dataset_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+) -> FileDatasetResponse:
+    """Get a file-uploaded dataset by ID (owner only)."""
+    from app.services.dataset import get_file_dataset
+
+    dataset = await get_file_dataset(db, dataset_id, current_user.id)
+    if dataset is None:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    return FileDatasetResponse.from_dataset(dataset)
+
+
+@router.get(
+    "/file/{dataset_id}/preview",
+    response_model=DatasetPreview,
+)
+async def preview_file_dataset(
+    dataset_id: int,
+    limit: int = Query(10, ge=1, le=100),
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+) -> DatasetPreview:
+    """Get a preview of the first N rows of a file dataset."""
+    try:
+        data = await get_preview(db, dataset_id, current_user.id, limit=limit)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from None
+    return DatasetPreview(**data)
+
+
+@router.get(
+    "/file/{dataset_id}/statistics",
+    response_model=list[DatasetStatistics],
+)
+async def file_dataset_statistics(
+    dataset_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+) -> list[DatasetStatistics]:
+    """Get per-column statistics for a CSV file dataset."""
+    try:
+        stats = await get_file_statistics(db, dataset_id, current_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from None
+    return [DatasetStatistics(**s) for s in stats]

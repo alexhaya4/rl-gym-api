@@ -86,6 +86,11 @@ class Settings(BaseSettings):
     # Inference
     INFERENCE_CACHE_MAX_MODELS: int = 5
 
+    # Datasets
+    DATASET_STORAGE_PATH: str = "/tmp/rl_datasets"  # nosec B108 - configurable via env var
+    MAX_DATASET_SIZE_MB: int = 100
+    ALLOWED_DATASET_EXTENSIONS: list[str] = [".csv", ".json", ".zip"]
+
     # Video
     VIDEO_STORAGE_PATH: str = "/tmp/rl_videos"  # nosec B108 - configurable via env var
     MAX_VIDEO_SIZE_MB: int = 100
